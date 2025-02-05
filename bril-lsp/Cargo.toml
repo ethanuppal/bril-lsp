@@ -1,0 +1,13 @@
+[package]
+name = "bril-lsp"
+description = "Language server for Bril"
+version = "0.1.2"
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+tokio.workspace = true
+tower-lsp.workspace = true
+bril-frontend = { path = "../bril-frontend/", version = "0.1.2" }
+dashmap.workspace = true
+logos.workspace = true
