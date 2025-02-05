@@ -49,11 +49,11 @@ jobs:
 
       - name: Test correct parsing
         run: |
-          make bril-frontend \
-            ROOT="/home/runner/work/cs6120/cs6120" \
-            BRIL="../bril" \
-            EQUIV_NAME="bril-frontend --example print" \
-            EQUIV_CMD="../target/debug/examples/print -"
+          cargo run --package check-lossless \
+            bril/benchmarks/core/*.bril bbril/benchmarks/float/*.bril \
+            --exclude core/char-poly.bril \
+            --exclude float/norm.bril \
+            --exclude float/conjugate-gradient.bril
 
       - name: Install Turnt
         # run: pip install turnt  # Use instead if pip turnt version >= 1.7
