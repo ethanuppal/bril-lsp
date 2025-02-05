@@ -1,0 +1,3 @@
+[submodule "bril.nvim"]
+	path = bril.nvim
+	url = https://github.com/ethanuppal/bril.nvim
