@@ -6,7 +6,7 @@ Install the Bril LSP before using this extension.
 First, [install a Rust toolchain](https://rustup.rs) and then run:
 
 ```
-cargo install --locked --git https://gitlab.com/ethanuppal/cs6120 bril-lsp
+cargo install --locked --git https://github.com/ethanuppal/bril-lsp bril-lsp
 ```
 
 Once you've installed it, disable and reenable this extension if you already
