@@ -1,0 +1,87 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Bril",
+  "patterns": [
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#identifiers"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#literals"
+    },
+    {
+      "include": "#comments"
+    }
+  ],
+  "repository": {
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.import",
+          "match": "\\b(from|import|as)\\b"
+        },
+        {
+          "name": "support.type",
+          "match": "\\b(int|bool|float|char|ptr)\\b"
+        }
+      ]
+    },
+    "identifiers": {
+      "patterns": [
+        {
+          "name": "support.function",
+          "match": "\\b@[a-zA-Z_][a-zA-Z0-9_]*\\b"
+        },
+        {
+          "name": "meta.selector",
+          "match": "\\b\\.[a-zA-Z_][a-zA-Z0-9_\\.]*\\b"
+        },
+        {
+          "name": "variable",
+          "match": "\\b[a-zA-Z_][a-zA-Z0-9_\\.]*\\b"
+        }
+      ]
+    },
+    "strings": {
+      "name": "string.quoted.double",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "string.other",
+          "match": "\\\\."
+        }
+      ]
+    },
+    "literals": {
+      "patterns": [
+        {
+          "name": "constant.numeric",
+          "match": "\\b(-)?(\\d+)(\\.\\d+)?\\b"
+        },
+        {
+          "name": "constant.character",
+          "match": "\\b'.'\\b"
+        },
+        {
+          "name": "keyword.other",
+          "match": "\\b(true|false)\\b"
+        }
+      ]
+    },
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line",
+          "match": "#.*\n"
+        }
+      ]
+    }
+  },
+  "scopeName": "source.bril"
+}
