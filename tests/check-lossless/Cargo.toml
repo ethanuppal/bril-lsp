@@ -1,0 +1,13 @@
+[package]
+name = "check-lossless"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+argh.workspace = true
+camino.workspace = true
+threadpool.workspace = true
+snafu.workspace = true
+owo-colors.workspace = true
+serde_json.workspace = true

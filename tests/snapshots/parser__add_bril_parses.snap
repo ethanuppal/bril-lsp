@@ -1,0 +1,22 @@
+---
+source: bril-frontend/tests/parser.rs
+expression: "format! (\"ORIGINAL\\n--------\\n{}\\n\\nPRINTED\\n-------\\n{}\", code, buffer)"
+---
+ORIGINAL
+--------
+@main {
+  v0: int = const 1;
+  v1: int = const 2;
+  v2: int = add v0 v1;
+  print v2;
+}
+
+
+PRINTED
+-------
+@main() {
+  v0: int = const 1;
+  v1: int = const 2;
+  v2: int = add v0 v1;
+  print v2;
+}

@@ -1,0 +1,16 @@
+---
+source: bril-frontend/tests/infer_types.rs
+expression: diagnostic
+---
+Diagnostic {
+    message: "Inferred type int did not match type annotation",
+    span: 35..41,
+    labels: [
+        (
+            "Type inferred here",
+            Some(
+                44..55,
+            ),
+        ),
+    ],
+}

@@ -1,0 +1,26 @@
+---
+source: bril-frontend/tests/parser.rs
+expression: parser.diagnostics()
+---
+[
+    Diagnostic {
+        message: "Unexpected token",
+        span: 123..126,
+        labels: [
+            (
+                "Top-level Bril constructs are imports or functions",
+                None,
+            ),
+        ],
+    },
+    Diagnostic {
+        message: "Failed to find another valid import or function to recover from",
+        span: 123..126,
+        labels: [
+            (
+                "Recovery started here",
+                None,
+            ),
+        ],
+    },
+]

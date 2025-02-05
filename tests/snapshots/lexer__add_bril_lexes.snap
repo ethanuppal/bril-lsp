@@ -1,0 +1,153 @@
+---
+source: bril-frontend/tests/lexer.rs
+expression: "LexerSnapshot { code, tokens }"
+---
+LexerSnapshot {
+    code: "@main {\n  v0: int = const 1;\n  v1: int = const 2;\n  v2: int = add v0 v1;\n  print v2;\n}\n",
+    tokens: [
+        Loc {
+            inner: FunctionName(
+                "@main",
+            ),
+            span: 0..5,
+        },
+        Loc {
+            inner: LeftBrace,
+            span: 6..7,
+        },
+        Loc {
+            inner: Identifier(
+                "v0",
+            ),
+            span: 10..12,
+        },
+        Loc {
+            inner: Colon,
+            span: 12..13,
+        },
+        Loc {
+            inner: Identifier(
+                "int",
+            ),
+            span: 14..17,
+        },
+        Loc {
+            inner: Equals,
+            span: 18..19,
+        },
+        Loc {
+            inner: Identifier(
+                "const",
+            ),
+            span: 20..25,
+        },
+        Loc {
+            inner: Integer(
+                1,
+            ),
+            span: 26..27,
+        },
+        Loc {
+            inner: Semi,
+            span: 27..28,
+        },
+        Loc {
+            inner: Identifier(
+                "v1",
+            ),
+            span: 31..33,
+        },
+        Loc {
+            inner: Colon,
+            span: 33..34,
+        },
+        Loc {
+            inner: Identifier(
+                "int",
+            ),
+            span: 35..38,
+        },
+        Loc {
+            inner: Equals,
+            span: 39..40,
+        },
+        Loc {
+            inner: Identifier(
+                "const",
+            ),
+            span: 41..46,
+        },
+        Loc {
+            inner: Integer(
+                2,
+            ),
+            span: 47..48,
+        },
+        Loc {
+            inner: Semi,
+            span: 48..49,
+        },
+        Loc {
+            inner: Identifier(
+                "v2",
+            ),
+            span: 52..54,
+        },
+        Loc {
+            inner: Colon,
+            span: 54..55,
+        },
+        Loc {
+            inner: Identifier(
+                "int",
+            ),
+            span: 56..59,
+        },
+        Loc {
+            inner: Equals,
+            span: 60..61,
+        },
+        Loc {
+            inner: Identifier(
+                "add",
+            ),
+            span: 62..65,
+        },
+        Loc {
+            inner: Identifier(
+                "v0",
+            ),
+            span: 66..68,
+        },
+        Loc {
+            inner: Identifier(
+                "v1",
+            ),
+            span: 69..71,
+        },
+        Loc {
+            inner: Semi,
+            span: 71..72,
+        },
+        Loc {
+            inner: Identifier(
+                "print",
+            ),
+            span: 75..80,
+        },
+        Loc {
+            inner: Identifier(
+                "v2",
+            ),
+            span: 81..83,
+        },
+        Loc {
+            inner: Semi,
+            span: 83..84,
+        },
+        Loc {
+            inner: RightBrace,
+            span: 85..86,
+        },
+    ],
+}

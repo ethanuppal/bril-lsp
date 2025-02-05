@@ -1,0 +1,12 @@
+---
+source: bril-frontend/tests/infer_types.rs
+expression: "format! (\"PROGRAM\\n--------\\n{}\\n\\nTYPES\\n-------\\n{}\", code, snapshot)"
+---
+PROGRAM
+--------
+from "foo" import @bar, @baz as @bop;
+from "foo" import @bar, @baz;
+
+
+TYPES
+-------

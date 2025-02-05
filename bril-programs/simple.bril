@@ -1,0 +1,4 @@
+@main() {
+.test:
+  a: int = const 0;
+}

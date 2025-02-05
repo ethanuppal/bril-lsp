@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches:
+     - main
+  pull_request:
+    branches:
+     - main
+
+env:
+  CARGO_INCREMENTAL: 1
+
+jobs:
+  build_and_test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-15]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Integration tests
+        run: cargo test
+
+  snapshot_test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-15]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Clone Bril
+        run: git clone https://github.com/sampsyo/bril && cd bril && git reset --hard 94764e92585c7133d08ac14cf3c563d1d272434a
+
+      - uses: actions/setup-python@v4
+        with:
+            python-version: '3.11'
+            cache: pip
+            cache-dependency-path: /bril/bril-txt/pyproject.toml
+
+      - name: Install Flit
+        run: pip install flit
+      - name: Install Python tools
+        run: cd bril/bril-txt ; flit install --symlink
+
+      - name: Test correct parsing
+        run: |
+          make bril-frontend \
+            ROOT="/home/runner/work/cs6120/cs6120" \
+            BRIL="../bril" \
+            EQUIV_NAME="bril-frontend --example print" \
+            EQUIV_CMD="../target/debug/examples/print -"
+
+      - name: Install Turnt
+        # run: pip install turnt  # Use instead if pip turnt version >= 1.7
+        uses: actions/checkout@v4
+        with:
+          repository: cucapra/turnt
+          path: './turnt'
+      - name: Install Turnt part 2
+        run: cd turnt ; flit install --symlink
+
+      - name: Turnt test correct type inference
+        run: |
+          cd bril-frontend/bril-programs
+          turnt core_benchmarks_copied/*.bril

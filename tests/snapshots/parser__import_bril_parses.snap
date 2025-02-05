@@ -1,0 +1,14 @@
+---
+source: bril-frontend/tests/parser.rs
+expression: "format! (\"ORIGINAL\\n--------\\n{}\\n\\nPRINTED\\n-------\\n{}\", code, buffer)"
+---
+ORIGINAL
+--------
+from "foo" import @bar, @baz as @bop;
+from "foo" import @bar, @baz;
+
+
+PRINTED
+-------
+from "foo" import @bar, @baz as @bop;
+from "foo" import @bar, @baz;

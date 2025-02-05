@@ -1,0 +1,13 @@
+---
+source: bril-frontend/tests/lexer.rs
+expression: "LexerErrorSnapshot\n{\n    code, tokens, failure : Loc :: new(lexer.slice(), lexer.span()), leftover\n    : lexer.remainder()\n}"
+---
+LexerErrorSnapshot {
+    code: "$main",
+    tokens: [],
+    failure: Loc {
+        inner: "$",
+        span: 0..1,
+    },
+    leftover: "main",
+}

@@ -1,0 +1,103 @@
+---
+source: bril-frontend/tests/lexer.rs
+expression: "LexerSnapshot { code, tokens }"
+---
+LexerSnapshot {
+    code: "import from as @main .foo foo \"path/to/lol\" {}:<>;=,() 5 5.0 'a'",
+    tokens: [
+        Loc {
+            inner: Import,
+            span: 0..6,
+        },
+        Loc {
+            inner: From,
+            span: 7..11,
+        },
+        Loc {
+            inner: As,
+            span: 12..14,
+        },
+        Loc {
+            inner: FunctionName(
+                "@main",
+            ),
+            span: 15..20,
+        },
+        Loc {
+            inner: Label(
+                ".foo",
+            ),
+            span: 21..25,
+        },
+        Loc {
+            inner: Identifier(
+                "foo",
+            ),
+            span: 26..29,
+        },
+        Loc {
+            inner: Path(
+                "path/to/lol",
+            ),
+            span: 30..43,
+        },
+        Loc {
+            inner: LeftBrace,
+            span: 44..45,
+        },
+        Loc {
+            inner: RightBrace,
+            span: 45..46,
+        },
+        Loc {
+            inner: Colon,
+            span: 46..47,
+        },
+        Loc {
+            inner: LeftAngle,
+            span: 47..48,
+        },
+        Loc {
+            inner: RightAngle,
+            span: 48..49,
+        },
+        Loc {
+            inner: Semi,
+            span: 49..50,
+        },
+        Loc {
+            inner: Equals,
+            span: 50..51,
+        },
+        Loc {
+            inner: Comma,
+            span: 51..52,
+        },
+        Loc {
+            inner: LeftPar,
+            span: 52..53,
+        },
+        Loc {
+            inner: RightPar,
+            span: 53..54,
+        },
+        Loc {
+            inner: Integer(
+                5,
+            ),
+            span: 55..56,
+        },
+        Loc {
+            inner: Float(
+                5.0,
+            ),
+            span: 57..60,
+        },
+        Loc {
+            inner: Character(
+                'a',
+            ),
+            span: 61..64,
+        },
+    ],
+}

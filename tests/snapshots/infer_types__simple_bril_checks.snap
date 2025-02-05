@@ -1,0 +1,16 @@
+---
+source: bril-frontend/tests/infer_types.rs
+expression: "format! (\"PROGRAM\\n--------\\n{}\\n\\nTYPES\\n-------\\n{}\", code, snapshot)"
+---
+PROGRAM
+--------
+@main() {
+.test:
+  a: int = const 0;
+}
+
+
+TYPES
+-------
+FUNCTION @main
+  a: int

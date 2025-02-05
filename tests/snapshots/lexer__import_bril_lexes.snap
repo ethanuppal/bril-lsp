@@ -1,0 +1,87 @@
+---
+source: bril-frontend/tests/lexer.rs
+expression: "LexerSnapshot { code, tokens }"
+---
+LexerSnapshot {
+    code: "from \"foo\" import @bar, @baz as @bop;\nfrom \"foo\" import @bar, @baz;\n",
+    tokens: [
+        Loc {
+            inner: From,
+            span: 0..4,
+        },
+        Loc {
+            inner: Path(
+                "foo",
+            ),
+            span: 5..10,
+        },
+        Loc {
+            inner: Import,
+            span: 11..17,
+        },
+        Loc {
+            inner: FunctionName(
+                "@bar",
+            ),
+            span: 18..22,
+        },
+        Loc {
+            inner: Comma,
+            span: 22..23,
+        },
+        Loc {
+            inner: FunctionName(
+                "@baz",
+            ),
+            span: 24..28,
+        },
+        Loc {
+            inner: As,
+            span: 29..31,
+        },
+        Loc {
+            inner: FunctionName(
+                "@bop",
+            ),
+            span: 32..36,
+        },
+        Loc {
+            inner: Semi,
+            span: 36..37,
+        },
+        Loc {
+            inner: From,
+            span: 38..42,
+        },
+        Loc {
+            inner: Path(
+                "foo",
+            ),
+            span: 43..48,
+        },
+        Loc {
+            inner: Import,
+            span: 49..55,
+        },
+        Loc {
+            inner: FunctionName(
+                "@bar",
+            ),
+            span: 56..60,
+        },
+        Loc {
+            inner: Comma,
+            span: 60..61,
+        },
+        Loc {
+            inner: FunctionName(
+                "@baz",
+            ),
+            span: 62..66,
+        },
+        Loc {
+            inner: Semi,
+            span: 66..67,
+        },
+    ],
+}

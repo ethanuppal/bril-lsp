@@ -1,0 +1,37 @@
+[workspace]
+resolver = "2"
+members = ["tests/check-lossless"]
+
+[workspace.package]
+edition = "2021"
+license = "GPL-3.0"
+
+[workspace.dependencies]
+logos = "0.15.0"
+inform = "0.3.4"
+annotate-snippets = "0.11.5"
+
+insta = "1.42.1"
+snafu = "0.8.5"
+
+camino = "1.1.9"
+threadpool = "1.8.1"
+argh = "0.1.13"
+owo-colors = "4.1.0"
+serde_json = "1.0.138"
+
+[package]
+name = "bril-frontend"
+description = "AST and type-checking for Bril programs"
+version = "0.1.2"
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+logos.workspace = true
+inform.workspace = true
+
+[dev-dependencies]
+annotate-snippets.workspace = true
+insta.workspace = true
+snafu.workspace = true

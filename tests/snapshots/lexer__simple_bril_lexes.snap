@@ -1,0 +1,77 @@
+---
+source: bril-frontend/tests/lexer.rs
+expression: "LexerSnapshot { code, tokens }"
+---
+LexerSnapshot {
+    code: "@main() {\n.test:\n  a: int = const 0;\n}\n",
+    tokens: [
+        Loc {
+            inner: FunctionName(
+                "@main",
+            ),
+            span: 0..5,
+        },
+        Loc {
+            inner: LeftPar,
+            span: 5..6,
+        },
+        Loc {
+            inner: RightPar,
+            span: 6..7,
+        },
+        Loc {
+            inner: LeftBrace,
+            span: 8..9,
+        },
+        Loc {
+            inner: Label(
+                ".test",
+            ),
+            span: 10..15,
+        },
+        Loc {
+            inner: Colon,
+            span: 15..16,
+        },
+        Loc {
+            inner: Identifier(
+                "a",
+            ),
+            span: 19..20,
+        },
+        Loc {
+            inner: Colon,
+            span: 20..21,
+        },
+        Loc {
+            inner: Identifier(
+                "int",
+            ),
+            span: 22..25,
+        },
+        Loc {
+            inner: Equals,
+            span: 26..27,
+        },
+        Loc {
+            inner: Identifier(
+                "const",
+            ),
+            span: 28..33,
+        },
+        Loc {
+            inner: Integer(
+                0,
+            ),
+            span: 34..35,
+        },
+        Loc {
+            inner: Semi,
+            span: 35..36,
+        },
+        Loc {
+            inner: RightBrace,
+            span: 37..38,
+        },
+    ],
+}
