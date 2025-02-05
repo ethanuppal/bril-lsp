@@ -1,5 +1,5 @@
 use std::{
-    backtrace::Backtrace, ffi::OsString, fs, io::Write, process::{Command, Stdio}, sync::mpsc
+    backtrace::Backtrace, ffi::OsString, fs, io::Write, process::{Command, Stdio}, sync::mpsc, thread::available_parallelism
 };
 
 use argh::FromArgs;
@@ -47,7 +47,7 @@ struct Opts {
 fn main() -> Result<(), Whatever> {
     let opts: Opts = argh::from_env();
 
-    let worker_count = 4;
+    let worker_count = available_parallelism().map(|value| value.get()).unwrap_or(4);
     let pool = ThreadPool::new(worker_count);
 
     let (tx, rx) = mpsc::channel();

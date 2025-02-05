@@ -50,7 +50,7 @@ jobs:
       - name: Test correct parsing
         run: |
           cargo run --package check-lossless \
-            bril/benchmarks/core/*.bril bbril/benchmarks/float/*.bril \
+            bril/benchmarks/core/*.bril bril/benchmarks/float/*.bril \
             --exclude core/char-poly.bril \
             --exclude float/norm.bril \
             --exclude float/conjugate-gradient.bril
