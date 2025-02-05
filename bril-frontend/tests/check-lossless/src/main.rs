@@ -1,5 +1,11 @@
 use std::{
-    backtrace::Backtrace, ffi::OsString, fs, io::Write, process::{Command, Stdio}, sync::mpsc, thread::available_parallelism
+    backtrace::Backtrace,
+    ffi::OsString,
+    fs,
+    io::Write,
+    process::{Command, Stdio},
+    sync::mpsc,
+    thread::available_parallelism,
 };
 
 use argh::FromArgs;
@@ -47,14 +53,17 @@ struct Opts {
 fn main() -> Result<(), Whatever> {
     let opts: Opts = argh::from_env();
 
-    let worker_count = available_parallelism().map(|value| value.get()).unwrap_or(4);
+    let worker_count = available_parallelism()
+        .map(|value| value.get())
+        .unwrap_or(4);
     let pool = ThreadPool::new(worker_count);
 
     let (tx, rx) = mpsc::channel();
     let paths = opts
-            .paths
-            .into_iter()
-            .filter(|path| !opts.exclude.iter().any(|exclude| path.ends_with(exclude))).collect::<Vec<_>>();
+        .paths
+        .into_iter()
+        .filter(|path| !opts.exclude.iter().any(|exclude| path.ends_with(exclude)))
+        .collect::<Vec<_>>();
     for path in paths.clone() {
         let sh = opts.sh.clone();
         let cargo = opts.cargo.to_string_lossy().to_string();
@@ -79,7 +88,7 @@ fn main() -> Result<(), Whatever> {
                     .wait_with_output()
                     .whatever_context("Failed to finish executing bril2json")?;
 
-                let bril2json_stdout = 
+                let bril2json_stdout =
                         String::from_utf8(bril2json_output.stdout).unwrap_or_default();
                 if !bril2json_output.status.success() {
                     whatever!(
@@ -94,8 +103,8 @@ fn main() -> Result<(), Whatever> {
 
                 // too lazy to be granular here
                 let our_output = Command::new(sh).args(["-c", &format!("{cargo} run --quiet --example print -- {path} | {bril2json}")]).output().whatever_context(format!("Failed to execute the lossless printer on {}", path))?;
-                
-                let our_stdout = 
+
+                let our_stdout =
                         String::from_utf8(our_output.stdout).unwrap_or_default();
                 if !our_output.status.success() {
                     whatever!(
@@ -128,15 +137,15 @@ fn main() -> Result<(), Whatever> {
     let mut number_received = 0;
     while number_received < paths.len() {
         match rx.recv().expect("failed to receive from channel") {
-    Ok(path) => {
+            Ok(path) => {
                 println!("{}", format!("{path} OK").bold().bright_green());
-            },
-    Err((path, error)) => {
+            }
+            Err((path, error)) => {
                 println!("{}", format!("{path} ERROR").bold().bright_red());
                 eprintln!("{path} ERROR:\n{error}");
                 has_error = true;
-            },
-};
+            }
+        };
         number_received += 1;
     }
 

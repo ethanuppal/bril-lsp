@@ -120,10 +120,7 @@ impl<T: Spanned> MaybeSpanned for Vec<T> {
         if self.is_empty() {
             None
         } else {
-            Some(
-                self.first().unwrap().span().start
-                    ..self.last().unwrap().span().end,
-            )
+            Some(self.first().unwrap().span().start..self.last().unwrap().span().end)
         }
     }
 }

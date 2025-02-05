@@ -25,8 +25,7 @@ pub fn create_function_context(
             return_type = Some(return_type_annotation.ty.inner.clone());
         }
 
-        context
-            .insert(function.name.to_string(), (parameter_types, return_type));
+        context.insert(function.name.to_string(), (parameter_types, return_type));
     }
     context
 }
@@ -59,44 +58,36 @@ pub fn type_infer_function(
         return_type = Some(return_type_annotation.ty.inner.clone());
     }
 
-    let get_signature =
-        |name: &Loc<&str>| -> Result<(Vec<Type>, Option<Type>), Diagnostic> {
-            if let Some(signature) = context.get(&name.to_string()) {
-                Ok(signature.clone())
-            } else {
-                Err(Diagnostic::new("Called undefined function", name))
-            }
-        };
+    let get_signature = |name: &Loc<&str>| -> Result<(Vec<Type>, Option<Type>), Diagnostic> {
+        if let Some(signature) = context.get(&name.to_string()) {
+            Ok(signature.clone())
+        } else {
+            Err(Diagnostic::new("Called undefined function", name))
+        }
+    };
 
-    let ensure =
-        |op: &str, arg: &Loc<&str>, ty: Type| -> Result<(), Diagnostic> {
-            if let Some(arg_type) = env.borrow().get(&arg.to_string()) {
-                if arg_type.is_same_type_as(&ty) {
-                    Ok(())
-                } else {
-                    let symbols = symbols.borrow();
-                    let original = symbols
-                        .get(&arg.to_string())
-                        .expect("type exists so symbol does too");
-                    Err(Diagnostic::new(
-                        format!(
-                            "Expected argument of type {} in {} instruction",
-                            ty, op
-                        ),
-                        arg,
-                    )
-                    .label(
-                        format!("Type inferred here to be {}", arg_type),
-                        original,
-                    ))
-                }
+    let ensure = |op: &str, arg: &Loc<&str>, ty: Type| -> Result<(), Diagnostic> {
+        if let Some(arg_type) = env.borrow().get(&arg.to_string()) {
+            if arg_type.is_same_type_as(&ty) {
+                Ok(())
             } else {
+                let symbols = symbols.borrow();
+                let original = symbols
+                    .get(&arg.to_string())
+                    .expect("type exists so symbol does too");
                 Err(Diagnostic::new(
-                    format!("Undefined variable in this {} instruction", op),
+                    format!("Expected argument of type {} in {} instruction", ty, op),
                     arg,
-                ))
+                )
+                .label(format!("Type inferred here to be {}", arg_type), original))
             }
-        };
+        } else {
+            Err(Diagnostic::new(
+                format!("Undefined variable in this {} instruction", op),
+                arg,
+            ))
+        }
+    };
 
     for code in &function.body {
         if let ast::FunctionCode::Instruction(instruction) = &**code {
@@ -104,18 +95,13 @@ pub fn type_infer_function(
                 ast::Instruction::Constant(constant) => {
                     let mut inferred_type = match &*constant.value {
                         ast::ConstantValue::IntegerLiteral(_) => ast::Type::Int,
-                        ast::ConstantValue::BooleanLiteral(_) => {
-                            ast::Type::Bool
-                        }
+                        ast::ConstantValue::BooleanLiteral(_) => ast::Type::Bool,
                         ast::ConstantValue::FloatLiteral(_) => ast::Type::Float,
-                        ast::ConstantValue::CharacterLiteral(_) => {
-                            ast::Type::Char
-                        }
+                        ast::ConstantValue::CharacterLiteral(_) => ast::Type::Char,
                     };
 
                     if let Some(annotation) = &constant.type_annotation {
-                        if !annotation.ty.inner.is_same_type_as(&inferred_type)
-                        {
+                        if !annotation.ty.inner.is_same_type_as(&inferred_type) {
                             if annotation.ty.is_same_type_as(&Type::Float)
                                 && inferred_type.is_same_type_as(&Type::Int)
                             {
@@ -128,10 +114,9 @@ pub fn type_infer_function(
                         }
                     }
 
-                    symbols.borrow_mut().insert(
-                        constant.name.to_string(),
-                        constant.name.clone(),
-                    );
+                    symbols
+                        .borrow_mut()
+                        .insert(constant.name.to_string(), constant.name.clone());
                     env.borrow_mut()
                         .insert(constant.name.to_string(), inferred_type);
                 }
@@ -199,23 +184,22 @@ pub fn type_infer_function(
                         ast::ValueOperationOp::Call(name, args) => {
                             let signature = get_signature(name)?;
                             if args.len() != signature.0.len() {
-                                return Err(Diagnostic::new(format!("Called function takes {} argument(s) but was passed {}", signature.0.len(), args.len()), name));
+                                return Err(Diagnostic::new(
+                                    format!(
+                                        "Called function takes {} argument(s) but was passed {}",
+                                        signature.0.len(),
+                                        args.len()
+                                    ),
+                                    name,
+                                ));
                             }
-                            for (i, parameter_type) in
-                                signature.0.iter().enumerate()
-                            {
-                                ensure(
-                                    "call",
-                                    &args[i],
-                                    parameter_type.clone(),
-                                )?;
+                            for (i, parameter_type) in signature.0.iter().enumerate() {
+                                ensure("call", &args[i], parameter_type.clone())?;
                             }
                             signature.1.clone().ok_or(Diagnostic::new("Called function has no return type, but call used as value operation", name))?
                         }
                         ast::ValueOperationOp::Id(value) => {
-                            let Some(ty) =
-                                env.borrow().get(&value.to_string()).cloned()
-                            else {
+                            let Some(ty) = env.borrow().get(&value.to_string()).cloned() else {
                                 return Err(Diagnostic::new(
                                     "Undefined variable in id instruction",
                                     value,
@@ -271,9 +255,14 @@ pub fn type_infer_function(
                     };
 
                     if let Some(annotation) = &value_operation.type_annotation {
-                        if !annotation.ty.inner.is_same_type_as(&inferred_type)
-                        {
-                            return Err(Diagnostic::new(format!("Inferred type {inferred_type} did not match type annotation"), annotation).label("Type inferred here", &value_operation.op));
+                        if !annotation.ty.inner.is_same_type_as(&inferred_type) {
+                            return Err(Diagnostic::new(
+                                format!(
+                                    "Inferred type {inferred_type} did not match type annotation"
+                                ),
+                                annotation,
+                            )
+                            .label("Type inferred here", &value_operation.op));
                         }
                     }
 
@@ -281,10 +270,8 @@ pub fn type_infer_function(
                         value_operation.name.to_string(),
                         value_operation.name.clone(),
                     );
-                    env.borrow_mut().insert(
-                        value_operation.name.to_string(),
-                        inferred_type,
-                    );
+                    env.borrow_mut()
+                        .insert(value_operation.name.to_string(), inferred_type);
                 }
                 ast::Instruction::EffectOperation(effect_operation) => {
                     match &*effect_operation.op {
@@ -295,16 +282,17 @@ pub fn type_infer_function(
                         ast::EffectOperationOp::Call(name, args) => {
                             let signature = get_signature(name)?;
                             if args.len() != signature.0.len() {
-                                return Err(Diagnostic::new(format!("Called function takes {} argument(s) but was passed {}", signature.0.len(), args.len()), name));
+                                return Err(Diagnostic::new(
+                                    format!(
+                                        "Called function takes {} argument(s) but was passed {}",
+                                        signature.0.len(),
+                                        args.len()
+                                    ),
+                                    name,
+                                ));
                             }
-                            for (i, parameter_type) in
-                                signature.0.iter().enumerate()
-                            {
-                                ensure(
-                                    "call",
-                                    &args[i],
-                                    parameter_type.clone(),
-                                )?;
+                            for (i, parameter_type) in signature.0.iter().enumerate() {
+                                ensure("call", &args[i], parameter_type.clone())?;
                             }
                             if let Some(return_type) = &signature.1 {
                                 return Err(Diagnostic::new(format!("Called function returns {}, but call used as effect operation", return_type), name));
@@ -315,10 +303,19 @@ pub fn type_infer_function(
                                 if let Some(return_type) = return_type.clone() {
                                     ensure("ret", value, return_type)?;
                                 } else {
-                                    return Err(Diagnostic::new("Tried to return value, but function has no return type", value));
+                                    return Err(Diagnostic::new(
+                                        "Tried to return value, but function has no return type",
+                                        value,
+                                    ));
                                 }
                             } else if let Some(return_type) = return_type {
-                                return Err(Diagnostic::new(format!("Tried to return nothing, but function has return type {}", return_type), effect_operation));
+                                return Err(Diagnostic::new(
+                                    format!(
+                                        "Tried to return nothing, but function has return type {}",
+                                        return_type
+                                    ),
+                                    effect_operation,
+                                ));
                             }
                         }
                         ast::EffectOperationOp::Print(_) => {}

@@ -34,11 +34,7 @@ impl Diagnostic {
         }
     }
 
-    pub fn label(
-        mut self,
-        text: impl Into<String>,
-        spanned: impl Spanned,
-    ) -> Self {
+    pub fn label(mut self, text: impl Into<String>, spanned: impl Spanned) -> Self {
         self.labels.push((text.into(), Some(spanned.span())));
         self
     }
@@ -137,9 +133,7 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
 
     pub fn get(&self, offset: isize) -> Option<&Loc<Token<'source>>> {
         let get_index = ((self.index as isize) + offset) as usize;
-        if !(offset < 0 && (-offset) as usize > self.index)
-            && get_index < self.tokens.len()
-        {
+        if !(offset < 0 && (-offset) as usize > self.index) && get_index < self.tokens.len() {
             Some(&self.tokens[get_index])
         } else {
             None
@@ -158,8 +152,7 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
 
     pub fn try_eat(&mut self, pattern: Token) -> Option<Loc<Token<'source>>> {
         if self.is_at(&pattern) {
-            let result =
-                self.get(0).expect("is_at is true so we're not EOF").clone();
+            let result = self.get(0).expect("is_at is true so we're not EOF").clone();
             self.advance();
             Some(result)
         } else {
@@ -173,8 +166,7 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
         message: impl Into<String>,
     ) -> Result<Loc<Token<'source>>> {
         if self.is_at(&pattern) {
-            let result =
-                self.get(0).expect("is_at is true so we're not EOF").clone();
+            let result = self.get(0).expect("is_at is true so we're not EOF").clone();
             self.advance();
             Ok(result)
         } else {
@@ -193,10 +185,7 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
             } else {
                 self.diagnostics.push(
                     Diagnostic::new(
-                        format!(
-                            "Unexpected EOF, expected '{}'",
-                            pattern.pattern_name()
-                        ),
+                        format!("Unexpected EOF, expected '{}'", pattern.pattern_name()),
                         self.eof_span(),
                     )
                     .explain(message),
@@ -229,9 +218,8 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
             self.index += 1;
         }
 
-        self.diagnostics.push(
-            Diagnostic::new(message, current).explain("Recovery started here"),
-        );
+        self.diagnostics
+            .push(Diagnostic::new(message, current).explain("Recovery started here"));
     }
 
     pub fn parse_separated<'a, U, F: FnMut(&mut Self) -> Result<U>>(
@@ -268,16 +256,13 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
                     self.diagnostics.push(
                         Diagnostic::new(
                             format!(
-                            "Unexpected EOF, expected separator (one of: {})",
-                            separators
-                                .iter()
-                                .map(|separator| format!(
-                                    "'{}'",
-                                    separator.pattern_name()
-                                ))
-                                .collect::<Vec<_>>()
-                                .join(", "),
-                        ),
+                                "Unexpected EOF, expected separator (one of: {})",
+                                separators
+                                    .iter()
+                                    .map(|separator| format!("'{}'", separator.pattern_name()))
+                                    .collect::<Vec<_>>()
+                                    .join(", "),
+                            ),
                             self.eof_span(),
                         )
                         .explain(message),
@@ -295,10 +280,7 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
                     "Unexpected EOF, expected terminator (one of: {})",
                     terminators
                         .into_iter()
-                        .map(|terminator| format!(
-                            "'{}'",
-                            terminator.pattern_name()
-                        ))
+                        .map(|terminator| format!("'{}'", terminator.pattern_name()))
                         .collect::<Vec<_>>()
                         .join(", "),
                 ),
@@ -327,18 +309,14 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
         .between(as_token, name))
     }
 
-    pub fn parse_imported_function(
-        &mut self,
-    ) -> Result<Loc<ast::ImportedFunction<'source>>> {
+    pub fn parse_imported_function(&mut self) -> Result<Loc<ast::ImportedFunction<'source>>> {
         let name = self
             .eat(Token::FunctionName(""), "Expected function name to import")?
             .map(Token::assume_function_name);
 
         let mut alias = None;
         if let Some(as_token) = self.try_eat(Token::As) {
-            alias = Some(
-                self.parse_imported_function_alias(as_token.without_inner())?,
-            );
+            alias = Some(self.parse_imported_function_alias(as_token.without_inner())?);
         }
 
         let start = name.span();
@@ -349,10 +327,7 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
         Ok(ast::ImportedFunction { name, alias }.between(start, end))
     }
 
-    pub fn parse_import(
-        &mut self,
-        from_token: Loc<()>,
-    ) -> Result<Loc<ast::Import<'source>>> {
+    pub fn parse_import(&mut self, from_token: Loc<()>) -> Result<Loc<ast::Import<'source>>> {
         let path = self
             .eat(Token::Path(""), "Expected path after `from`")?
             .map(Token::assume_path);
@@ -388,24 +363,16 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
     pub fn parse_constant_value(&mut self) -> Result<Loc<ast::ConstantValue>> {
         if let Some(integer) = self.try_eat(Token::Integer(0)) {
             let span = integer.span();
-            Ok(ast::ConstantValue::IntegerLiteral(
-                integer.map(Token::assume_integer),
-            )
-            .at(span))
+            Ok(ast::ConstantValue::IntegerLiteral(integer.map(Token::assume_integer)).at(span))
         } else if let Some(float) = self.try_eat(Token::Float(0.0)) {
             let span = float.span();
-            Ok(
-                ast::ConstantValue::FloatLiteral(
-                    float.map(Token::assume_float),
-                )
-                .at(span),
-            )
+            Ok(ast::ConstantValue::FloatLiteral(float.map(Token::assume_float)).at(span))
         } else if let Some(character) = self.try_eat(Token::Character(' ')) {
             let span = character.span();
-            Ok(ast::ConstantValue::CharacterLiteral(
-                character.map(Token::assume_character),
+            Ok(
+                ast::ConstantValue::CharacterLiteral(character.map(Token::assume_character))
+                    .at(span),
             )
-            .at(span))
         } else if let Some(true_literal) = self.try_eat(Token::True) {
             let span = true_literal.span();
             Ok(ast::ConstantValue::BooleanLiteral(true.at(&span)).at(span))
@@ -413,14 +380,14 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
             let span = false_literal.span();
             Ok(ast::ConstantValue::BooleanLiteral(false.at(&span)).at(span))
         } else {
-            self.diagnostics.push(Diagnostic::new(
-                "Unknown constant value: expected integer, float, or character",
-self.get(0)
-                    .map(|token| token.span())
-                    .unwrap_or(self.eof_span())
-            )
-                .explain("This is not a valid constant value"
+            self.diagnostics.push(
+                Diagnostic::new(
+                    "Unknown constant value: expected integer, float, or character",
+                    self.get(0)
+                        .map(|token| token.span())
+                        .unwrap_or(self.eof_span()),
                 )
+                .explain("This is not a valid constant value"),
             );
             Err(())
         }
@@ -516,9 +483,7 @@ self.get(0)
         .between(start, end))
     }
 
-    pub fn parse_effect_operation_op(
-        &mut self,
-    ) -> Result<Loc<ast::EffectOperationOp<'source>>> {
+    pub fn parse_effect_operation_op(&mut self) -> Result<Loc<ast::EffectOperationOp<'source>>> {
         let op_name = self
             .eat(
                 Token::Identifier(""),
@@ -541,9 +506,7 @@ self.get(0)
         Err(())
     }
 
-    pub fn parse_effect_operation(
-        &mut self,
-    ) -> Result<Loc<ast::EffectOperation<'source>>> {
+    pub fn parse_effect_operation(&mut self) -> Result<Loc<ast::EffectOperation<'source>>> {
         let op = self.parse_effect_operation_op()?;
         let semi_token = self
             .eat(
@@ -556,14 +519,11 @@ self.get(0)
         Ok(ast::EffectOperation { op, semi_token }.between(start, end))
     }
 
-    pub fn parse_instruction(
-        &mut self,
-    ) -> Result<Loc<ast::Instruction<'source>>> {
+    pub fn parse_instruction(&mut self) -> Result<Loc<ast::Instruction<'source>>> {
         let is_not_effect_operation = self
             .get(1)
             .map(|token| {
-                token.matches_against(Token::Colon)
-                    || token.matches_against(Token::Equals)
+                token.matches_against(Token::Colon) || token.matches_against(Token::Equals)
             })
             .unwrap_or(false);
 
@@ -615,9 +575,7 @@ self.get(0)
         }
     }
 
-    pub fn parse_function_code(
-        &mut self,
-    ) -> Result<Loc<ast::FunctionCode<'source>>> {
+    pub fn parse_function_code(&mut self) -> Result<Loc<ast::FunctionCode<'source>>> {
         if self.is_at(&Token::Label("")) {
             let label = self.parse_label()?;
             let colon_token = self
@@ -625,8 +583,7 @@ self.get(0)
                 .without_inner();
             let start = label.span();
             let end = colon_token.span();
-            Ok(ast::FunctionCode::Label { label, colon_token }
-                .between(start, end))
+            Ok(ast::FunctionCode::Label { label, colon_token }.between(start, end))
         } else {
             let instruction = self.parse_instruction()?;
             let span = instruction.span();
@@ -645,10 +602,7 @@ self.get(0)
             "float" => ast::Type::Float.at(ty),
             "char" => ast::Type::Char.at(ty),
             "ptr" => {
-                self.eat(
-                    Token::LeftAngle,
-                    "Missing inner type for pointer type",
-                )?;
+                self.eat(Token::LeftAngle, "Missing inner type for pointer type")?;
                 let inner = self.parse_type()?;
                 let end = self.eat(
                     Token::RightAngle,
@@ -657,18 +611,14 @@ self.get(0)
                 ast::Type::Ptr(Box::new(inner)).between(ty, end)
             }
             _ => {
-                self.diagnostics.push(
-                    Diagnostic::new("Unknown type", ty)
-                        .explain("This is not a valid type"),
-                );
+                self.diagnostics
+                    .push(Diagnostic::new("Unknown type", ty).explain("This is not a valid type"));
                 return Err(());
             }
         })
     }
 
-    pub fn parse_type_annotation(
-        &mut self,
-    ) -> Result<Loc<ast::TypeAnnotation>> {
+    pub fn parse_type_annotation(&mut self) -> Result<Loc<ast::TypeAnnotation>> {
         let colon_token = self
             .eat(Token::Colon, "Need colon before type in type annotation")?
             .without_inner();
@@ -729,8 +679,7 @@ self.get(0)
             }
         }
 
-        let end =
-            self.eat(Token::RightBrace, "Missing left brace to open function")?;
+        let end = self.eat(Token::RightBrace, "Missing left brace to open function")?;
 
         Ok(ast::Function {
             name: name.clone(),
@@ -746,9 +695,7 @@ self.get(0)
         let mut functions = vec![];
         while !self.is_eof() {
             if let Some(from_token) = self.try_eat(Token::From) {
-                if let Ok(import) =
-                    self.parse_import(from_token.without_inner())
-                {
+                if let Ok(import) = self.parse_import(from_token.without_inner()) {
                     imports.push(import);
                 } else {
                     self.recover(
@@ -756,12 +703,10 @@ self.get(0)
                         "Failed to find another valid import or function to recover from",
                     );
                 }
-            } else if let Some(function_name) =
-                self.try_eat(Token::FunctionName(""))
-            {
-                if let Ok(function) = self.parse_function(
-                    function_name.map(Token::assume_function_name),
-                ) {
+            } else if let Some(function_name) = self.try_eat(Token::FunctionName("")) {
+                if let Ok(function) =
+                    self.parse_function(function_name.map(Token::assume_function_name))
+                {
                     functions.push(function);
                 } else {
                     self.recover(
@@ -771,16 +716,12 @@ self.get(0)
                 }
             } else {
                 self.diagnostics.push(
-                    Diagnostic::new(
-                        "Unexpected token",
-                        self.get(0).expect("We're not eof"),
-                    )
-                    .explain(
-                        "Top-level Bril constructs are imports or functions",
-                    ),
+                    Diagnostic::new("Unexpected token", self.get(0).expect("We're not eof"))
+                        .explain("Top-level Bril constructs are imports or functions"),
                 );
-                self.recover([Token::Import, Token::FunctionName("")],
-                        "Failed to find another valid import or function to recover from",
+                self.recover(
+                    [Token::Import, Token::FunctionName("")],
+                    "Failed to find another valid import or function to recover from",
                 );
             }
         }

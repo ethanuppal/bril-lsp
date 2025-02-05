@@ -21,9 +21,7 @@ use bril_frontend::{
 };
 use dashmap::DashMap;
 use logos::Logos;
-use tower_lsp::{
-    jsonrpc, lsp_types::*, Client, LanguageServer, LspService, Server,
-};
+use tower_lsp::{jsonrpc, lsp_types::*, Client, LanguageServer, LspService, Server};
 
 struct BuiltinCompletionItem {
     name: &'static str,
@@ -163,8 +161,7 @@ const BUILTIN_COMPLETIONS: [BuiltinCompletionItem; 21] = [
 
 const BUILTIN_COMPLETIONS_LENGTH: usize = BUILTIN_COMPLETIONS.len();
 
-pub fn get_builtin_completions() -> [CompletionItem; BUILTIN_COMPLETIONS_LENGTH]
-{
+pub fn get_builtin_completions() -> [CompletionItem; BUILTIN_COMPLETIONS_LENGTH] {
     BUILTIN_COMPLETIONS
         .iter()
         .map(|item| CompletionItem {
@@ -172,10 +169,7 @@ pub fn get_builtin_completions() -> [CompletionItem; BUILTIN_COMPLETIONS_LENGTH]
             kind: Some(item.kind),
             documentation: Some(Documentation::MarkupContent(MarkupContent {
                 kind: MarkupKind::Markdown,
-                value: format!(
-                    "{}\n---\nExtension: <{}>",
-                    item.description, item.extension
-                ),
+                value: format!("{}\n---\nExtension: <{}>", item.description, item.extension),
             })),
             ..Default::default()
         })
@@ -215,9 +209,7 @@ pub fn instruction_symbols<'ast, 'source>(
     let mut symbols = vec![];
     match instruction {
         Instruction::Constant(constant) => symbols.push(&constant.name),
-        Instruction::ValueOperation(value_operation) => {
-            symbols.push(&value_operation.name)
-        }
+        Instruction::ValueOperation(value_operation) => symbols.push(&value_operation.name),
         Instruction::EffectOperation(_) => {}
     }
     symbols
@@ -232,15 +224,10 @@ impl Backend {
         }
     }
 
-    fn find_hover_symbol(
-        &self,
-        uri: &Url,
-        position: &Position,
-    ) -> Option<(LspSymbol, Span)> {
+    fn find_hover_symbol(&self, uri: &Url, position: &Position) -> Option<(LspSymbol, Span)> {
         let lsp_file_info = self.files.get(uri)?;
         let byte_index =
-            lsp_file_info.line_starts.get(position.line as usize)?
-                + position.character as usize;
+            lsp_file_info.line_starts.get(position.line as usize)? + position.character as usize;
         lsp_file_info
             .hover_complete_symbols
             .iter()
@@ -248,15 +235,10 @@ impl Backend {
             .cloned()
     }
 
-    fn find_symbols_up_to(
-        &self,
-        uri: &Url,
-        position: &Position,
-    ) -> Option<Vec<(LspSymbol, Span)>> {
+    fn find_symbols_up_to(&self, uri: &Url, position: &Position) -> Option<Vec<(LspSymbol, Span)>> {
         let lsp_file_info = self.files.get(uri)?;
         let byte_index =
-            lsp_file_info.line_starts.get(position.line as usize)?
-                + position.character as usize;
+            lsp_file_info.line_starts.get(position.line as usize)? + position.character as usize;
         Some(
             lsp_file_info
                 .hover_complete_symbols
@@ -267,11 +249,7 @@ impl Backend {
         )
     }
 
-    async fn compile_and_check_errors(
-        &self,
-        message: &'static str,
-        uri: &Url,
-    ) -> Vec<Diagnostic> {
+    async fn compile_and_check_errors(&self, message: &'static str, uri: &Url) -> Vec<Diagnostic> {
         let Ok(path) = PathBuf::from(uri.path()).canonicalize() else {
             self.client
                 .log_message(
@@ -305,11 +283,7 @@ impl Backend {
                     Some(DiagnosticSeverity::ERROR),
                     None,
                     None,
-                    format!(
-                        "Failed to open file {}: {}",
-                        path.to_string_lossy(),
-                        error
-                    ),
+                    format!("Failed to open file {}: {}", path.to_string_lossy(), error),
                     None,
                     None,
                 )];
@@ -320,15 +294,11 @@ impl Backend {
 
         // https://docs.rs/codespan-reporting/latest/src/codespan_reporting/files.rs.html#251-253
         fn line_starts(source: &str) -> impl '_ + Iterator<Item = usize> {
-            std::iter::once(0)
-                .chain(source.match_indices('\n').map(|(i, _)| i + 1))
+            std::iter::once(0).chain(source.match_indices('\n').map(|(i, _)| i + 1))
         }
 
         // https://docs.rs/codespan-reporting/latest/codespan_reporting/files/fn.line_starts.html
-        fn line_index(
-            line_starts: &[usize],
-            byte_index: usize,
-        ) -> Option<usize> {
+        fn line_index(line_starts: &[usize], byte_index: usize) -> Option<usize> {
             match line_starts.binary_search(&byte_index) {
                 Ok(line) => Some(line),
                 Err(next_line) => Some(next_line - 1),
@@ -337,10 +307,7 @@ impl Backend {
 
         let line_starts = line_starts(&contents).collect::<Vec<_>>();
 
-        fn index_to_position(
-            line_starts: &[usize],
-            byte_index: usize,
-        ) -> Position {
+        fn index_to_position(line_starts: &[usize], byte_index: usize) -> Position {
             let zero_indexed_row = line_index(line_starts, byte_index)
                 .expect("INTERNAL BUG: Failed to turn byte index into row");
             let zero_indexed_col = byte_index - line_starts[zero_indexed_row];
@@ -369,10 +336,7 @@ impl Backend {
                             .map(|(text, span)| DiagnosticRelatedInformation {
                                 location: Location::new(
                                     uri.clone(),
-                                    span_to_range(
-                                        span.clone()
-                                            .unwrap_or(diagnostic.span.clone()),
-                                    ),
+                                    span_to_range(span.clone().unwrap_or(diagnostic.span.clone())),
                                 ),
                                 message: text.clone(),
                             })
@@ -408,6 +372,7 @@ impl Backend {
                                children: Option<Vec<DocumentSymbol>>|
          -> DocumentSymbol {
             let range = span_to_range(name.span());
+            #[allow(deprecated)] // since I have to assign to deprecated
             DocumentSymbol {
                 name: name.to_string(),
                 detail,
@@ -423,14 +388,10 @@ impl Backend {
         match parser.parse_program() {
             Ok(program) => {
                 let context =
-                    bril_frontend::infer_types::create_function_context(
-                        &program.functions,
-                    );
+                    bril_frontend::infer_types::create_function_context(&program.functions);
                 for function in &program.functions {
                     if let Err(diagnostic) =
-                        bril_frontend::infer_types::type_infer_function(
-                            &context, function,
-                        )
+                        bril_frontend::infer_types::type_infer_function(&context, function)
                     {
                         diagnostics.push(diagnostic_to_diagnostic(&diagnostic));
                     }
@@ -451,16 +412,11 @@ impl Backend {
                     ));
                     for imported_function in &import.imported_functions {
                         hover_complete_symbols.push((
-                            LspSymbol::Function(
-                                imported_function.name.to_string(),
-                                None,
-                            ),
+                            LspSymbol::Function(imported_function.name.to_string(), None),
                             imported_function.name.span(),
                         ));
-                        if let Some(alias_name) = imported_function
-                            .alias
-                            .as_ref()
-                            .map(|alias| &alias.name)
+                        if let Some(alias_name) =
+                            imported_function.alias.as_ref().map(|alias| &alias.name)
                         {
                             document_symbols.push(document_symbol(
                                 alias_name,
@@ -469,10 +425,7 @@ impl Backend {
                                 None,
                             ));
                             hover_complete_symbols.push((
-                                LspSymbol::Function(
-                                    alias_name.to_string(),
-                                    None,
-                                ),
+                                LspSymbol::Function(alias_name.to_string(), None),
                                 alias_name.span(),
                             ));
                         } else {
@@ -491,10 +444,7 @@ impl Backend {
 
                     for code in &function.body {
                         match &**code {
-                            bril_frontend::ast::FunctionCode::Label {
-                                label,
-                                ..
-                            } => {
+                            bril_frontend::ast::FunctionCode::Label { label, .. } => {
                                 children.push(document_symbol(
                                     &label.name,
                                     None,
@@ -509,17 +459,10 @@ impl Backend {
                                     label.name.span(),
                                 ));
                             }
-                            bril_frontend::ast::FunctionCode::Instruction(
-                                instruction,
-                            ) => {
-                                for instruction_symbol in
-                                    instruction_symbols(instruction)
-                                {
+                            bril_frontend::ast::FunctionCode::Instruction(instruction) => {
+                                for instruction_symbol in instruction_symbols(instruction) {
                                     hover_complete_symbols.push((
-                                        LspSymbol::Variable(
-                                            instruction_symbol.to_string(),
-                                            None,
-                                        ),
+                                        LspSymbol::Variable(instruction_symbol.to_string(), None),
                                         instruction_symbol.span(),
                                     ));
                                 }
@@ -549,10 +492,7 @@ impl Backend {
                         Some(children),
                     ));
                     hover_complete_symbols.push((
-                        LspSymbol::Function(
-                            function.name.to_string(),
-                            Some(signature),
-                        ),
+                        LspSymbol::Function(function.name.to_string(), Some(signature)),
                         function.name.span(),
                     ));
                 }
@@ -576,12 +516,7 @@ impl Backend {
         diagnostics
     }
 
-    async fn compile(
-        &self,
-        message: &'static str,
-        uri: Url,
-        version: Option<i32>,
-    ) {
+    async fn compile(&self, message: &'static str, uri: Url, version: Option<i32>) {
         let diagnostics = self.compile_and_check_errors(message, &uri).await;
         self.client
             .publish_diagnostics(uri, diagnostics, version)
@@ -591,10 +526,7 @@ impl Backend {
 
 #[tower_lsp::async_trait]
 impl LanguageServer for Backend {
-    async fn initialize(
-        &self,
-        _: InitializeParams,
-    ) -> jsonrpc::Result<InitializeResult> {
+    async fn initialize(&self, _: InitializeParams) -> jsonrpc::Result<InitializeResult> {
         Ok(InitializeResult {
             capabilities: ServerCapabilities {
                 hover_provider: Some(HoverProviderCapability::Simple(true)),
@@ -606,9 +538,7 @@ impl LanguageServer for Backend {
                         change: Some(TextDocumentSyncKind::FULL),
                         will_save: None,
                         will_save_wait_until: None,
-                        save: Some(TextDocumentSyncSaveOptions::Supported(
-                            true,
-                        )),
+                        save: Some(TextDocumentSyncSaveOptions::Supported(true)),
                     },
                 )),
                 ..Default::default()
@@ -659,46 +589,34 @@ impl LanguageServer for Backend {
             &params.text_document_position.text_document.uri,
             &params.text_document_position.position,
         ) {
-            completions.extend(symbols.iter().map(|(symbol, _)| {
-                CompletionItem {
-                    label: match symbol {
-                        LspSymbol::Variable(name, _)
-                        | LspSymbol::Label(name, _)
-                        | LspSymbol::Function(name, _) => name.clone(),
-                    },
-                    kind: Some(match symbol {
-                        LspSymbol::Variable(_, _) => {
-                            CompletionItemKind::VARIABLE
-                        }
-                        LspSymbol::Label(_, _) => CompletionItemKind::FUNCTION,
-                        LspSymbol::Function(_, _) => {
-                            CompletionItemKind::FUNCTION
-                        }
-                    }),
-                    detail: Some(match symbol {
-                        LspSymbol::Variable(_, ty) => ty
-                            .as_ref()
-                            .map(|ty| ty.to_string())
-                            .unwrap_or_default(),
-                        LspSymbol::Label(_, function) => {
-                            format!("Defined in `{}`", function)
-                        }
-                        LspSymbol::Function(_, signature) => {
-                            signature.clone().unwrap_or_default()
-                        }
-                    }),
-                    documentation: None,
-                    ..Default::default()
-                }
+            completions.extend(symbols.iter().map(|(symbol, _)| CompletionItem {
+                label: match symbol {
+                    LspSymbol::Variable(name, _)
+                    | LspSymbol::Label(name, _)
+                    | LspSymbol::Function(name, _) => name.clone(),
+                },
+                kind: Some(match symbol {
+                    LspSymbol::Variable(_, _) => CompletionItemKind::VARIABLE,
+                    LspSymbol::Label(_, _) => CompletionItemKind::FUNCTION,
+                    LspSymbol::Function(_, _) => CompletionItemKind::FUNCTION,
+                }),
+                detail: Some(match symbol {
+                    LspSymbol::Variable(_, ty) => {
+                        ty.as_ref().map(|ty| ty.to_string()).unwrap_or_default()
+                    }
+                    LspSymbol::Label(_, function) => {
+                        format!("Defined in `{}`", function)
+                    }
+                    LspSymbol::Function(_, signature) => signature.clone().unwrap_or_default(),
+                }),
+                documentation: None,
+                ..Default::default()
             }));
         }
         Ok(Some(CompletionResponse::Array(completions)))
     }
 
-    async fn hover(
-        &self,
-        hover: HoverParams,
-    ) -> jsonrpc::Result<Option<Hover>> {
+    async fn hover(&self, hover: HoverParams) -> jsonrpc::Result<Option<Hover>> {
         let Some(symbol) = self.find_hover_symbol(
             &hover.text_document_position_params.text_document.uri,
             &hover.text_document_position_params.position,
@@ -706,32 +624,29 @@ impl LanguageServer for Backend {
             return Ok(None);
         };
         Ok(Some(Hover {
-            contents: HoverContents::Scalar(MarkedString::String(
-                match symbol.0 {
-                    LspSymbol::Variable(name, ty) => format!(
-                        "Variable `{}`{}",
-                        name,
-                        if let Some(ty) = ty {
-                            format!(": `{}`", ty)
-                        } else {
-                            "".into()
-                        }
-                    ),
-                    LspSymbol::Label(label, function) => format!(
-                        "Label `{}`, defined in function `{}`",
-                        label, function
-                    ),
-                    LspSymbol::Function(function, signature) => format!(
-                        "Function `{}{}",
-                        function,
-                        if let Some(signature) = signature {
-                            format!("{}`", signature)
-                        } else {
-                            "`".into()
-                        }
-                    ),
-                },
-            )),
+            contents: HoverContents::Scalar(MarkedString::String(match symbol.0 {
+                LspSymbol::Variable(name, ty) => format!(
+                    "Variable `{}`{}",
+                    name,
+                    if let Some(ty) = ty {
+                        format!(": `{}`", ty)
+                    } else {
+                        "".into()
+                    }
+                ),
+                LspSymbol::Label(label, function) => {
+                    format!("Label `{}`, defined in function `{}`", label, function)
+                }
+                LspSymbol::Function(function, signature) => format!(
+                    "Function `{}{}",
+                    function,
+                    if let Some(signature) = signature {
+                        format!("{}`", signature)
+                    } else {
+                        "`".into()
+                    }
+                ),
+            })),
             range: None,
         }))
     }
@@ -740,9 +655,10 @@ impl LanguageServer for Backend {
         &self,
         params: DocumentSymbolParams,
     ) -> jsonrpc::Result<Option<DocumentSymbolResponse>> {
-        Ok(self.files.get(&params.text_document.uri).map(|info| {
-            DocumentSymbolResponse::Nested(info.document_symbols.to_vec())
-        }))
+        Ok(self
+            .files
+            .get(&params.text_document.uri)
+            .map(|info| DocumentSymbolResponse::Nested(info.document_symbols.to_vec())))
     }
 }
 

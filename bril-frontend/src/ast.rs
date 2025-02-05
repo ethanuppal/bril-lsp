@@ -73,9 +73,7 @@ impl Type {
             | (Type::Bool, Type::Bool)
             | (Type::Float, Type::Float)
             | (Type::Char, Type::Char) => true,
-            (Type::Ptr(inner), Type::Ptr(inner2)) => {
-                inner.is_same_type_as(inner2)
-            }
+            (Type::Ptr(inner), Type::Ptr(inner2)) => inner.is_same_type_as(inner2),
             _ => false,
         }
     }

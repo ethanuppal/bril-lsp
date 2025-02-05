@@ -27,18 +27,14 @@ fn main() -> Result<(), Whatever> {
 
     let mut reader: Box<dyn io::Read> = match file.as_str() {
         "-" => Box::new(io::stdin()),
-        _ => Box::new(
-            fs::File::open(&file)
-                .whatever_context(format!("Failed to open {}", file))?,
-        ),
+        _ => Box::new(fs::File::open(&file).whatever_context(format!("Failed to open {}", file))?),
     };
 
     let mut contents = vec![];
     reader
         .read_to_end(&mut contents)
         .whatever_context(format!("Failed to read {}", file))?;
-    let code = String::from_utf8(contents)
-        .whatever_context("Couldn't decode file as UTF-8")?;
+    let code = String::from_utf8(contents).whatever_context("Couldn't decode file as UTF-8")?;
 
     let mut lexer = Token::lexer(&code);
     let mut tokens = vec![];
@@ -60,9 +56,7 @@ fn main() -> Result<(), Whatever> {
                 message = message.snippet(
                     Snippet::source(&code).origin(&file).fold(true).annotation(
                         Level::Error
-                            .span(
-                                span.clone().unwrap_or(diagnostic.span.clone()),
-                            )
+                            .span(span.clone().unwrap_or(diagnostic.span.clone()))
                             .label(text.as_str()),
                     ),
                 );

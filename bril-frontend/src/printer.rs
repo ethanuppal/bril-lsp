@@ -52,9 +52,7 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
 
     pub fn print_import(&mut self, import: &ast::Import) -> fmt::Result {
         write!(self.w, "from \"{}\" import ", import.path)?;
-        for (i, imported_function) in
-            import.imported_functions.iter().enumerate()
-        {
+        for (i, imported_function) in import.imported_functions.iter().enumerate() {
             if i > 0 {
                 write!(self.w, ", ")?;
             }
@@ -79,10 +77,7 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
         }
     }
 
-    pub fn print_type_annotation(
-        &mut self,
-        type_annotation: &ast::TypeAnnotation,
-    ) -> fmt::Result {
+    pub fn print_type_annotation(&mut self, type_annotation: &ast::TypeAnnotation) -> fmt::Result {
         write!(self.w, ": ")?;
         self.print_type(&type_annotation.ty)
     }
@@ -91,10 +86,7 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
         write!(self.w, "{}", label.name)
     }
 
-    pub fn print_constant_value(
-        &mut self,
-        constant_value: &ast::ConstantValue,
-    ) -> fmt::Result {
+    pub fn print_constant_value(&mut self, constant_value: &ast::ConstantValue) -> fmt::Result {
         match constant_value {
             ast::ConstantValue::IntegerLiteral(integer) => {
                 write!(self.w, "{}", integer)
@@ -207,10 +199,7 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
         }
     }
 
-    pub fn print_value_operation(
-        &mut self,
-        value_operation: &ast::ValueOperation,
-    ) -> fmt::Result {
+    pub fn print_value_operation(&mut self, value_operation: &ast::ValueOperation) -> fmt::Result {
         write!(self.w, "{}", value_operation.name)?;
         if let Some(type_annotation) = &value_operation.type_annotation {
             self.print_type_annotation(type_annotation)?;
@@ -277,14 +266,9 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
         writeln!(self.w, ";")
     }
 
-    pub fn print_instruction(
-        &mut self,
-        instruction: &ast::Instruction,
-    ) -> fmt::Result {
+    pub fn print_instruction(&mut self, instruction: &ast::Instruction) -> fmt::Result {
         match instruction {
-            ast::Instruction::Constant(constant) => {
-                self.print_constant(constant)
-            }
+            ast::Instruction::Constant(constant) => self.print_constant(constant),
             ast::Instruction::ValueOperation(value_operation) => {
                 self.print_value_operation(value_operation)
             }
@@ -294,10 +278,7 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
         }
     }
 
-    pub fn print_function_code(
-        &mut self,
-        code: &ast::FunctionCode,
-    ) -> fmt::Result {
+    pub fn print_function_code(&mut self, code: &ast::FunctionCode) -> fmt::Result {
         match code {
             ast::FunctionCode::Label { label, .. } => {
                 self.w.decrease_indent();
@@ -306,18 +287,14 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
                 self.w.increase_indent();
                 Ok(())
             }
-            ast::FunctionCode::Instruction(instruction) => {
-                self.print_instruction(instruction)
-            }
+            ast::FunctionCode::Instruction(instruction) => self.print_instruction(instruction),
         }
     }
 
     pub fn print_function(&mut self, function: &ast::Function) -> fmt::Result {
         write!(self.w, "{}(", function.name)?;
 
-        for (i, (name, type_annotation)) in
-            function.parameters.iter().enumerate()
-        {
+        for (i, (name, type_annotation)) in function.parameters.iter().enumerate() {
             if i > 0 {
                 write!(self.w, ", ")?;
             }

@@ -26,9 +26,7 @@ macro_rules! type_snapshot {
                         println!("Label: {}", text);
                         println!(
                             "Code: `{}`",
-                            &code[span
-                                .clone()
-                                .unwrap_or(diagnostic.span.clone())]
+                            &code[span.clone().unwrap_or(diagnostic.span.clone())]
                         );
                     }
                 }
@@ -36,14 +34,11 @@ macro_rules! type_snapshot {
             };
 
             use std::fmt::Write;
-            let context = bril_frontend::infer_types::create_function_context(
-                &program.functions,
-            );
+            let context = bril_frontend::infer_types::create_function_context(&program.functions);
             let mut snapshot = String::new();
             for function in &program.functions {
-                let env = match bril_frontend::infer_types::type_infer_function(
-                    &context, function,
-                ) {
+                let env = match bril_frontend::infer_types::type_infer_function(&context, function)
+                {
                     Ok(result) => result,
                     Err(diagnostic) => {
                         println!("{}:", diagnostic.message);
@@ -51,9 +46,7 @@ macro_rules! type_snapshot {
                             println!("Label: {}", text);
                             println!(
                                 "Code: `{}`",
-                                &code[span
-                                    .clone()
-                                    .unwrap_or(diagnostic.span.clone())]
+                                &code[span.clone().unwrap_or(diagnostic.span.clone())]
                             );
                         }
                         panic!("Failed to type check program");
@@ -102,23 +95,17 @@ macro_rules! type_error {
                         println!("Label: {}", text);
                         println!(
                             "Code: `{}`",
-                            &code[span
-                                .clone()
-                                .unwrap_or(diagnostic.span.clone())]
+                            &code[span.clone().unwrap_or(diagnostic.span.clone())]
                         );
                     }
                 }
                 panic!("Failed to parse program");
             };
 
-            let context = bril_frontend::infer_types::create_function_context(
-                &program.functions,
-            );
+            let context = bril_frontend::infer_types::create_function_context(&program.functions);
             for function in &program.functions {
                 if let Err(diagnostic) =
-                    bril_frontend::infer_types::type_infer_function(
-                        &context, function,
-                    )
+                    bril_frontend::infer_types::type_infer_function(&context, function)
                 {
                     assert_debug_snapshot!(diagnostic);
                     return;

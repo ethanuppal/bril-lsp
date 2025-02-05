@@ -26,9 +26,7 @@ macro_rules! parser_snapshot {
                         println!("Label: {}", text);
                         println!(
                             "Code: `{}`",
-                            &code[span
-                                .clone()
-                                .unwrap_or(diagnostic.span.clone())]
+                            &code[span.clone().unwrap_or(diagnostic.span.clone())]
                         );
                     }
                 }
