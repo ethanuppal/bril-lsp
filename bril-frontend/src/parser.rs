@@ -14,7 +14,7 @@
 
 use crate::{
     ast,
-    lexer::Token,
+    lexer::{Token, TokenPattern, KEYWORD_LIKE},
     loc::{Loc, Span, Spanned, WithLocation},
 };
 
@@ -55,7 +55,7 @@ pub type Result<T> = std::result::Result<T, ()>;
 
 macro_rules! try_op {
     (@parse_argument; $self:ident; Token::Identifier) => {
-        $self.eat(Token::Identifier(""), "Expected variable name for argument")?.map(Token::assume_identifier)
+        $self.parse_local_name("Expected variable name for argument")?
     };
     (@parse_argument; $self:ident; Token::Label) => {
         {
@@ -71,7 +71,7 @@ macro_rules! try_op {
         {
             let mut arguments = vec![];
             while !$self.is_eof() && !$self.is_at(&Token::Semi) {
-                arguments.push($self.eat(Token::Identifier(""), "Only variable names are valid variadic arguments")?.map(Token::assume_identifier))
+                arguments.push($self.parse_local_name("Only variable names are valid variadic arguments")?)
             }
             arguments
         }
@@ -79,7 +79,7 @@ macro_rules! try_op {
     (@parse_argument; $self:ident; Option::from) => {
         {
             if !$self.is_eof() && !$self.is_at(&Token::Semi) {
-                Some($self.eat(Token::Identifier(""), "Only variable names are valid optional arguments")?.map(Token::assume_identifier))
+                Some($self.parse_local_name("Only variable names are valid optional arguments")?)
             } else {
                 None
             }
@@ -160,12 +160,13 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
         }
     }
 
-    pub fn eat(
+    pub fn eat<'a>(
         &mut self,
-        pattern: Token,
+        pattern: impl TokenPattern<'a>,
         message: impl Into<String>,
     ) -> Result<Loc<Token<'source>>> {
-        if self.is_at(&pattern) {
+        let matches = pattern.matches().collect::<Vec<_>>();
+        if matches.iter().any(|token| self.is_at(token)) {
             let result = self.get(0).expect("is_at is true so we're not EOF").clone();
             self.advance();
             Ok(result)
@@ -174,9 +175,13 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
                 self.diagnostics.push(
                     Diagnostic::new(
                         format!(
-                            "Unexpected '{}', expected '{}'",
+                            "Unexpected '{}', expected {}",
                             current.pattern_name(),
-                            pattern.pattern_name(),
+                            matches
+                                .into_iter()
+                                .map(|token| format!("'{}'", token.pattern_name()))
+                                .collect::<Vec<_>>()
+                                .join(", ")
                         ),
                         current,
                     )
@@ -185,7 +190,14 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
             } else {
                 self.diagnostics.push(
                     Diagnostic::new(
-                        format!("Unexpected EOF, expected '{}'", pattern.pattern_name()),
+                        format!(
+                            "Unexpected EOF, expected {}",
+                            matches
+                                .into_iter()
+                                .map(|token| format!("'{}'", token.pattern_name()))
+                                .collect::<Vec<_>>()
+                                .join(", ")
+                        ),
                         self.eof_span(),
                     )
                     .explain(message),
@@ -225,12 +237,12 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
     pub fn parse_separated<'a, U, F: FnMut(&mut Self) -> Result<U>>(
         &mut self,
         mut f: F,
-        separators: impl IntoIterator<Item = Token<'a>>,
-        terminators: impl IntoIterator<Item = Token<'a>>,
+        separators: impl TokenPattern<'a>,
+        terminators: impl TokenPattern<'a>,
         message: impl Into<String>,
     ) -> Result<(Vec<U>, Loc<Token<'source>>)> {
-        let separators = separators.into_iter().collect::<Vec<_>>();
-        let terminators = terminators.into_iter().collect::<Vec<_>>();
+        let separators = separators.matches().collect::<Vec<_>>();
+        let terminators = terminators.matches().collect::<Vec<_>>();
 
         let mut result = vec![];
 
@@ -291,6 +303,12 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
         Err(())
     }
 
+    pub fn parse_local_name(&mut self, message: impl Into<String>) -> Result<Loc<&'source str>> {
+        Ok(self
+            .eat(KEYWORD_LIKE, message)?
+            .map(Token::assume_identifier_like))
+    }
+
     pub fn parse_imported_function_alias(
         &mut self,
         as_token: Loc<()>,
@@ -338,8 +356,8 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
 
         let (imported_functions, terminator) = self.parse_separated(
             Self::parse_imported_function,
-            [Token::Comma],
-            [Token::Semi],
+            Token::Comma,
+            Token::Semi,
             "Failed to parse imported function",
         )?;
 
@@ -449,9 +467,22 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
         try_op!(self; op_name: "fgt" => ValueOperationOp::Fgt(lhs as Token::Identifier, rhs as Token::Identifier));
         try_op!(self; op_name: "fge" => ValueOperationOp::Fge(lhs as Token::Identifier, rhs as Token::Identifier));
 
+        try_op!(self; op_name: "alloc" => ValueOperationOp::Alloc(size as Token::Identifier));
+        try_op!(self; op_name: "load" => ValueOperationOp::Load(pointer as Token::Identifier));
+        try_op!(self; op_name: "ptradd" => ValueOperationOp::PtrAdd(pointer as Token::Identifier, offset as Token::Identifier));
+
+        try_op!(self; op_name: "ceq" => ValueOperationOp::Ceq(lhs as Token::Identifier, rhs as Token::Identifier));
+        try_op!(self; op_name: "clt" => ValueOperationOp::Clt(lhs as Token::Identifier, rhs as Token::Identifier));
+        try_op!(self; op_name: "cle" => ValueOperationOp::Cle(lhs as Token::Identifier, rhs as Token::Identifier));
+        try_op!(self; op_name: "cgt" => ValueOperationOp::Cgt(lhs as Token::Identifier, rhs as Token::Identifier));
+        try_op!(self; op_name: "cge" => ValueOperationOp::Cge(lhs as Token::Identifier, rhs as Token::Identifier));
+        try_op!(self; op_name: "char2int" => ValueOperationOp::Char2Int(value as Token::Identifier));
+        try_op!(self; op_name: "int2char" => ValueOperationOp::Int2Char(value as Token::Identifier));
+
         self.diagnostics.push(
             Diagnostic::new("Unknown value operation", op_name)
-                .explain("Could not parse identifier as value operation"),
+                .explain("Could not parse identifier as value operation")
+                .explain("If this is a valid operation name, file an issue at <https://github.com/ethanuppal/bril-lsp>"),
         );
 
         Err(())
@@ -498,9 +529,13 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
         try_op!(self; op_name: "print" => EffectOperationOp::Print(value as Vec::from));
         try_op!(self; op_name: "nop" => EffectOperationOp::Nop);
 
+        try_op!(self; op_name: "store" => EffectOperationOp::Store(pointer as Token::Identifier, value as Token::Identifier));
+        try_op!(self; op_name: "free" => EffectOperationOp::Free(pointer as Token::Identifier));
+
         self.diagnostics.push(
             Diagnostic::new("Unknown effect operation", op_name)
-                .explain("Could not parse identifier as value operation"),
+                .explain("Could not parse identifier as value operation")
+                .explain("If this is a valid operation name, file an issue at <https://github.com/ethanuppal/bril-lsp>"),
         );
 
         Err(())
@@ -528,12 +563,8 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
             .unwrap_or(false);
 
         if is_not_effect_operation {
-            let name = self
-                .eat(
-                    Token::Identifier(""),
-                    "Expected destination variable name in instruction",
-                )?
-                .map(Token::assume_identifier);
+            let name =
+                self.parse_local_name("Expected destination variable name in instruction")?;
 
             let type_annotation = if self.is_at(&Token::Colon) {
                 Some(self.parse_type_annotation()?)
@@ -631,9 +662,7 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
     pub fn parse_function_parameter(
         &mut self,
     ) -> Result<(Loc<&'source str>, Loc<ast::TypeAnnotation>)> {
-        let name = self
-            .eat(Token::Identifier(""), "Expected parameter name")?
-            .map(Token::assume_identifier);
+        let name = self.parse_local_name("Expected parameter name")?;
         let annotation = self.parse_type_annotation()?;
         Ok((name, annotation))
     }
@@ -645,8 +674,8 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
         let parameters = if self.try_eat(Token::LeftPar).is_some() {
             self.parse_separated(
                 Self::parse_function_parameter,
-                [Token::Comma],
-                [Token::RightPar],
+                Token::Comma,
+                Token::RightPar,
                 "Failed to parse function parameters",
             )?
             .0

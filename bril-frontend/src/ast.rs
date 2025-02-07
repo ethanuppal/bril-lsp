@@ -147,6 +147,18 @@ pub enum ValueOperationOp<'a> {
     Fle(Loc<&'a str>, Loc<&'a str>),
     Fgt(Loc<&'a str>, Loc<&'a str>),
     Fge(Loc<&'a str>, Loc<&'a str>),
+
+    Alloc(Loc<&'a str>),
+    Load(Loc<&'a str>),
+    PtrAdd(Loc<&'a str>, Loc<&'a str>),
+
+    Ceq(Loc<&'a str>, Loc<&'a str>),
+    Clt(Loc<&'a str>, Loc<&'a str>),
+    Cgt(Loc<&'a str>, Loc<&'a str>),
+    Cle(Loc<&'a str>, Loc<&'a str>),
+    Cge(Loc<&'a str>, Loc<&'a str>),
+    Char2Int(Loc<&'a str>),
+    Int2Char(Loc<&'a str>),
 }
 
 pub struct ValueOperation<'a> {
@@ -166,6 +178,9 @@ pub enum EffectOperationOp<'a> {
 
     Print(Vec<Loc<&'a str>>),
     Nop,
+
+    Store(Loc<&'a str>, Loc<&'a str>),
+    Free(Loc<&'a str>),
 }
 
 pub struct EffectOperation<'a> {

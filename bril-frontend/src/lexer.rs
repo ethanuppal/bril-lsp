@@ -84,10 +84,10 @@ impl Token<'_> {
             Self::Import => "import",
             Self::From => "from",
             Self::As => "as",
-            Self::FunctionName(_) => "function name",
-            Self::Identifier(_) => "identifier",
-            Self::Label(_) => "label",
-            Self::Path(_) => "path",
+            Self::FunctionName(_) => "<function name>",
+            Self::Identifier(_) => "<identifier>",
+            Self::Label(_) => "<label>",
+            Self::Path(_) => "<path>",
             Self::LeftBrace => "(",
             Self::RightBrace => "}",
             Self::LeftPar => "(",
@@ -98,11 +98,11 @@ impl Token<'_> {
             Self::RightAngle => ">",
             Self::Semi => ";",
             Self::Equals => "=",
-            Self::Integer(_) => "integer",
-            Self::Float(_) => "float",
-            Self::Character(_) => "character",
-            Self::True => "true literal",
-            Self::False => "false literal",
+            Self::Integer(_) => "<integer>",
+            Self::Float(_) => "<float>",
+            Self::Character(_) => "<character>",
+            Self::True => "true",
+            Self::False => "false",
         }
     }
 }
@@ -148,6 +148,18 @@ impl<'a> Token<'a> {
             panic!("Expected identifier");
         };
         identifier
+    }
+
+    pub fn assume_identifier_like(self) -> &'a str {
+        match self {
+            Token::Import => "import",
+            Token::From => "from",
+            Token::As => "as",
+            Token::True => "true",
+            Token::False => "false",
+            Token::Identifier(identifier) => identifier,
+            _ => panic!("Expected identifier or keyword"),
+        }
     }
 
     pub fn assume_label(self) -> &'a str {
@@ -215,3 +227,28 @@ impl Clone for Token<'_> {
         }
     }
 }
+
+pub trait TokenPattern<'a> {
+    fn matches(self) -> impl Iterator<Item = Token<'a>>;
+}
+
+impl<'a, T: IntoIterator<Item = Token<'a>>> TokenPattern<'a> for T {
+    fn matches(self) -> impl Iterator<Item = Token<'a>> {
+        self.into_iter()
+    }
+}
+
+impl<'a> TokenPattern<'a> for Token<'a> {
+    fn matches(self) -> impl Iterator<Item = Token<'a>> {
+        [self].into_iter()
+    }
+}
+
+pub const KEYWORD_LIKE: [Token<'static>; 6] = [
+    Token::Identifier(""),
+    Token::Import,
+    Token::As,
+    Token::From,
+    Token::True,
+    Token::False,
+];
