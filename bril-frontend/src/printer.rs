@@ -196,6 +196,32 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
             ast::ValueOperationOp::Fge(lhs, rhs) => {
                 write!(self.w, "fge {} {}", lhs, rhs)
             }
+            ast::ValueOperationOp::Alloc(size) => {
+                write!(self.w, "alloc {}", size)
+            }
+            ast::ValueOperationOp::Load(pointer) => {
+                write!(self.w, "load {}", pointer)
+            }
+            ast::ValueOperationOp::PtrAdd(pointer, offset) => {
+                write!(self.w, "ptradd {} {}", pointer, offset)
+            }
+            ast::ValueOperationOp::Ceq(lhs, rhs) => {
+                write!(self.w, "ceq {} {}", lhs, rhs)
+            }
+            ast::ValueOperationOp::Clt(lhs, rhs) => {
+                write!(self.w, "clt {} {}", lhs, rhs)
+            }
+            ast::ValueOperationOp::Cle(lhs, rhs) => {
+                write!(self.w, "cle {} {}", lhs, rhs)
+            }
+            ast::ValueOperationOp::Cgt(lhs, rhs) => {
+                write!(self.w, "cgt {} {}", lhs, rhs)
+            }
+            ast::ValueOperationOp::Cge(lhs, rhs) => {
+                write!(self.w, "cge {} {}", lhs, rhs)
+            }
+            ast::ValueOperationOp::Char2Int(value) => write!(self.w, "char2int {}", value),
+            ast::ValueOperationOp::Int2Char(value) => write!(self.w, "int2char {}", value),
         }
     }
 
@@ -255,6 +281,10 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
                 )
             }
             ast::EffectOperationOp::Nop => write!(self.w, "nop"),
+            ast::EffectOperationOp::Store(pointer, value) => {
+                write!(self.w, "store {} {}", pointer, value)
+            }
+            ast::EffectOperationOp::Free(pointer) => write!(self.w, "free {}", pointer),
         }
     }
 

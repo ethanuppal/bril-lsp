@@ -150,6 +150,16 @@ impl<'a> Token<'a> {
         identifier
     }
 
+    pub fn assume_identifier_like(self) -> &'a str {
+        match self {
+            Token::Import => "import",
+            Token::From => "from",
+            Token::As => "as",
+            Token::Identifier(identifier) => identifier,
+            _ => panic!("Expected identifier or keyword"),
+        }
+    }
+
     pub fn assume_label(self) -> &'a str {
         let Self::Label(label) = self else {
             panic!("Expected label");
@@ -213,5 +223,21 @@ impl Clone for Token<'_> {
             Self::True => Self::True,
             Self::False => Self::False,
         }
+    }
+}
+
+pub trait TokenPattern<'a> {
+    fn matches(self) -> impl Iterator<Item = Token<'a>>;
+}
+
+impl<'a, T: IntoIterator<Item = Token<'a>>> TokenPattern<'a> for T {
+    fn matches(self) -> impl Iterator<Item = Token<'a>> {
+        self.into_iter()
+    }
+}
+
+impl<'a> TokenPattern<'a> for Token<'a> {
+    fn matches(self) -> impl Iterator<Item = Token<'a>> {
+        [self].into_iter()
     }
 }

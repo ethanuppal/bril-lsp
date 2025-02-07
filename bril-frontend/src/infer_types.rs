@@ -1,6 +1,7 @@
 use std::{
     cell::RefCell,
     collections::{BTreeMap, HashMap},
+    path::PathBuf,
 };
 
 use crate::{
@@ -252,6 +253,44 @@ pub fn type_infer_function(
                             ensure("fge", rhs, Type::Float)?;
                             Type::Bool
                         }
+                        ast::ValueOperationOp::Alloc(loc) => todo!("implement hindley-milner"),
+                        ast::ValueOperationOp::Load(loc) => todo!("implement hindley-milner"),
+                        ast::ValueOperationOp::PtrAdd(loc, loc1) => {
+                            todo!("implement hindley-milner")
+                        }
+                        ast::ValueOperationOp::Ceq(lhs, rhs) => {
+                            ensure("ceq", lhs, Type::Char)?;
+                            ensure("ceq", rhs, Type::Char)?;
+                            Type::Bool
+                        }
+                        ast::ValueOperationOp::Clt(lhs, rhs) => {
+                            ensure("clt", lhs, Type::Char)?;
+                            ensure("clt", rhs, Type::Char)?;
+                            Type::Bool
+                        }
+                        ast::ValueOperationOp::Cle(lhs, rhs) => {
+                            ensure("cle", lhs, Type::Char)?;
+                            ensure("cle", rhs, Type::Char)?;
+                            Type::Bool
+                        }
+                        ast::ValueOperationOp::Cgt(lhs, rhs) => {
+                            ensure("cgt", lhs, Type::Char)?;
+                            ensure("cgt", rhs, Type::Char)?;
+                            Type::Bool
+                        }
+                        ast::ValueOperationOp::Cge(lhs, rhs) => {
+                            ensure("cge", lhs, Type::Char)?;
+                            ensure("cge", rhs, Type::Char)?;
+                            Type::Bool
+                        }
+                        ast::ValueOperationOp::Char2Int(value) => {
+                            ensure("char2int", value, Type::Char)?;
+                            Type::Int
+                        }
+                        ast::ValueOperationOp::Int2Char(value) => {
+                            ensure("char2int", value, Type::Int)?;
+                            Type::Char
+                        }
                     };
 
                     if let Some(annotation) = &value_operation.type_annotation {
@@ -320,6 +359,10 @@ pub fn type_infer_function(
                         }
                         ast::EffectOperationOp::Print(_) => {}
                         ast::EffectOperationOp::Nop => {}
+                        ast::EffectOperationOp::Store(loc, loc1) => {
+                            todo!("implement hindley-milner")
+                        }
+                        ast::EffectOperationOp::Free(value) => todo!("implement hindley-milner"),
                     }
                 }
             }
