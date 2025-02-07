@@ -1,7 +1,6 @@
 use std::{
     cell::RefCell,
     collections::{BTreeMap, HashMap},
-    path::PathBuf,
 };
 
 use crate::{
@@ -253,9 +252,9 @@ pub fn type_infer_function(
                             ensure("fge", rhs, Type::Float)?;
                             Type::Bool
                         }
-                        ast::ValueOperationOp::Alloc(loc) => todo!("implement hindley-milner"),
-                        ast::ValueOperationOp::Load(loc) => todo!("implement hindley-milner"),
-                        ast::ValueOperationOp::PtrAdd(loc, loc1) => {
+                        ast::ValueOperationOp::Alloc(_loc) => todo!("implement hindley-milner"),
+                        ast::ValueOperationOp::Load(_loc) => todo!("implement hindley-milner"),
+                        ast::ValueOperationOp::PtrAdd(_loc, _loc1) => {
                             todo!("implement hindley-milner")
                         }
                         ast::ValueOperationOp::Ceq(lhs, rhs) => {
@@ -359,10 +358,10 @@ pub fn type_infer_function(
                         }
                         ast::EffectOperationOp::Print(_) => {}
                         ast::EffectOperationOp::Nop => {}
-                        ast::EffectOperationOp::Store(loc, loc1) => {
+                        ast::EffectOperationOp::Store(_loc, _loc1) => {
                             todo!("implement hindley-milner")
                         }
-                        ast::EffectOperationOp::Free(value) => todo!("implement hindley-milner"),
+                        ast::EffectOperationOp::Free(_value) => todo!("implement hindley-milner"),
                     }
                 }
             }

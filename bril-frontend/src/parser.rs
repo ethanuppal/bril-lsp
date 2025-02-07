@@ -166,7 +166,7 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
         message: impl Into<String>,
     ) -> Result<Loc<Token<'source>>> {
         let matches = pattern.matches().collect::<Vec<_>>();
-        if matches.iter().any(|token| self.is_at(&token)) {
+        if matches.iter().any(|token| self.is_at(token)) {
             let result = self.get(0).expect("is_at is true so we're not EOF").clone();
             self.advance();
             Ok(result)
