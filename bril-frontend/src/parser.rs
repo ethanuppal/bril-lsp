@@ -14,7 +14,7 @@
 
 use crate::{
     ast,
-    lexer::{Token, TokenPattern},
+    lexer::{Token, TokenPattern, KEYWORD_LIKE},
     loc::{Loc, Span, Spanned, WithLocation},
 };
 
@@ -71,7 +71,7 @@ macro_rules! try_op {
         {
             let mut arguments = vec![];
             while !$self.is_eof() && !$self.is_at(&Token::Semi) {
-                arguments.push($self.eat(Token::Identifier(""), "Only variable names are valid variadic arguments")?.map(Token::assume_identifier))
+                arguments.push($self.parse_local_name("Only variable names are valid variadic arguments")?)
             }
             arguments
         }
@@ -79,7 +79,7 @@ macro_rules! try_op {
     (@parse_argument; $self:ident; Option::from) => {
         {
             if !$self.is_eof() && !$self.is_at(&Token::Semi) {
-                Some($self.eat(Token::Identifier(""), "Only variable names are valid optional arguments")?.map(Token::assume_identifier))
+                Some($self.parse_local_name("Only variable names are valid optional arguments")?)
             } else {
                 None
             }
@@ -305,10 +305,7 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
 
     pub fn parse_local_name(&mut self, message: impl Into<String>) -> Result<Loc<&'source str>> {
         Ok(self
-            .eat(
-                [Token::Identifier(""), Token::Import, Token::From, Token::As],
-                message,
-            )?
+            .eat(KEYWORD_LIKE, message)?
             .map(Token::assume_identifier_like))
     }
 

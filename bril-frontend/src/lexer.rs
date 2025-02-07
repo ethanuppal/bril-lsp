@@ -84,10 +84,10 @@ impl Token<'_> {
             Self::Import => "import",
             Self::From => "from",
             Self::As => "as",
-            Self::FunctionName(_) => "function name",
-            Self::Identifier(_) => "identifier",
-            Self::Label(_) => "label",
-            Self::Path(_) => "path",
+            Self::FunctionName(_) => "<function name>",
+            Self::Identifier(_) => "<identifier>",
+            Self::Label(_) => "<label>",
+            Self::Path(_) => "<path>",
             Self::LeftBrace => "(",
             Self::RightBrace => "}",
             Self::LeftPar => "(",
@@ -98,11 +98,11 @@ impl Token<'_> {
             Self::RightAngle => ">",
             Self::Semi => ";",
             Self::Equals => "=",
-            Self::Integer(_) => "integer",
-            Self::Float(_) => "float",
-            Self::Character(_) => "character",
-            Self::True => "true literal",
-            Self::False => "false literal",
+            Self::Integer(_) => "<integer>",
+            Self::Float(_) => "<float>",
+            Self::Character(_) => "<character>",
+            Self::True => "true",
+            Self::False => "false",
         }
     }
 }
@@ -155,6 +155,8 @@ impl<'a> Token<'a> {
             Token::Import => "import",
             Token::From => "from",
             Token::As => "as",
+            Token::True => "true",
+            Token::False => "false",
             Token::Identifier(identifier) => identifier,
             _ => panic!("Expected identifier or keyword"),
         }
@@ -241,3 +243,12 @@ impl<'a> TokenPattern<'a> for Token<'a> {
         [self].into_iter()
     }
 }
+
+pub const KEYWORD_LIKE: [Token<'static>; 6] = [
+    Token::Identifier(""),
+    Token::Import,
+    Token::As,
+    Token::From,
+    Token::True,
+    Token::False,
+];
