@@ -8,6 +8,6 @@ license.workspace = true
 [dependencies]
 tokio.workspace = true
 tower-lsp.workspace = true
-bril-frontend = { path = "../bril-frontend/", version = "0.1.2" }
+bril-frontend = { path = "../bril-frontend/", version = "0.2.0" } # DO NOT PUBLISH LSP, FRONTEND 0.2.0 PANICS!
 dashmap.workspace = true
 logos.workspace = true
