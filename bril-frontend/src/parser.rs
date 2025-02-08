@@ -534,7 +534,7 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
 
         self.diagnostics.push(
             Diagnostic::new("Unknown effect operation", op_name)
-                .explain("Could not parse identifier as value operation")
+                .explain("Could not parse identifier as effect operation")
                 .explain("If this is a valid operation name, file an issue at <https://github.com/ethanuppal/bril-lsp>"),
         );
 
