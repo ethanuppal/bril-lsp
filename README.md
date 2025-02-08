@@ -24,8 +24,3 @@ First, [install a Rust toolchain](https://rustup.rs) and then run:
 ```
 cargo install --locked --git https://github.com/ethanuppal/bril-lsp bril-lsp
 ```
-
-## License
-
-`bril-frontend` and `bril-lsp` are licensed under the GNU General Public
-License, Version 3.0 only.
