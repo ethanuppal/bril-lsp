@@ -9,8 +9,30 @@ use std::fmt;
 use crate::loc::Loc;
 
 pub struct Program<'a> {
-    pub imports: Vec<Loc<Import<'a>>>,
-    pub functions: Vec<Loc<Function<'a>>>,
+    pub items: Vec<TopLevelItem<'a>>,
+}
+
+impl<'a> Program<'a> {
+    pub fn imports(&self) -> impl Iterator<Item = &Import<'a>> {
+        self.items.iter().filter_map(|item| match item {
+            TopLevelItem::Import(import) => Some(import),
+            _ => None,
+        })
+    }
+
+    pub fn functions(&self) -> impl Iterator<Item = &Function<'a>> {
+        self.items.iter().filter_map(|item| match item {
+            TopLevelItem::Function(function) => Some(function),
+            _ => None,
+        })
+    }
+}
+
+pub enum TopLevelItem<'a> {
+    Import(Import<'a>),
+    Function(Function<'a>),
+    Comment(Loc<&'a str>),
+    Newline(Loc<()>),
 }
 
 pub struct ImportedFunctionAlias<'a> {
@@ -43,6 +65,8 @@ pub enum FunctionCode<'a> {
         colon_token: Loc<()>,
     },
     Instruction(Loc<Instruction<'a>>),
+    Comment(Loc<&'a str>),
+    EmptyLine(Loc<()>),
 }
 
 pub struct Label<'a> {

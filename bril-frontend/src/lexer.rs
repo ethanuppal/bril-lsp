@@ -15,10 +15,12 @@ pub fn extract_character_from_token(slice: &str) -> Option<char> {
 }
 
 #[derive(Logos, Debug)]
-#[logos(skip r"[ \t\n\f]+")]
+#[logos(skip r"[ \t\f]+")]
 pub enum Token<'a> {
-    #[regex(r"#[^\n]*\n", logos::skip)]
-    Comment,
+    #[regex(r"[ \t\n\f]*(#[^\n]*)\n")]
+    Comment(&'a str),
+    #[regex(r"[ \t\n\f]*\n")]
+    EmptyLine,
 
     #[token("import")]
     Import,
@@ -72,7 +74,8 @@ pub enum Token<'a> {
 impl Token<'_> {
     pub fn pattern_name(&self) -> &'static str {
         match self {
-            Self::Comment => unreachable!(),
+            Self::Comment(_) => "<comment>",
+            Self::EmptyLine => "<empty line>",
             Self::Import => "import",
             Self::From => "from",
             Self::As => "as",
@@ -103,7 +106,9 @@ impl<'a> Token<'a> {
     pub fn matches_against(&self, pattern: Token<'a>) -> bool {
         matches!(
             (self, pattern),
-            (Self::Import, Self::Import)
+            (Self::Comment(_), Self::Comment(_))
+                | (Self::EmptyLine, Self::EmptyLine)
+                | (Self::Import, Self::Import)
                 | (Self::From, Self::From)
                 | (Self::As, Self::As)
                 | (Self::FunctionName(_), Self::FunctionName(_))
@@ -193,7 +198,8 @@ impl<'a> Token<'a> {
 impl Clone for Token<'_> {
     fn clone(&self) -> Self {
         match self {
-            Self::Comment => unreachable!(),
+            Self::Comment(comment) => Self::Comment(comment),
+            Self::EmptyLine => Self::EmptyLine,
             Self::Import => Self::Import,
             Self::From => Self::From,
             Self::As => Self::As,

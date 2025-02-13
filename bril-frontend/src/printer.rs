@@ -310,6 +310,10 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
                 Ok(())
             }
             ast::FunctionCode::Instruction(instruction) => self.print_instruction(instruction),
+            ast::FunctionCode::Comment(comment) => {
+                writeln!(self.w, "{}", comment)
+            }
+            ast::FunctionCode::EmptyLine(_) => writeln!(self.w),
         }
     }
 
