@@ -34,7 +34,10 @@ fn main() -> Result<(), Whatever> {
     reader
         .read_to_end(&mut contents)
         .whatever_context(format!("Failed to read {}", file))?;
-    let code = String::from_utf8(contents).whatever_context("Couldn't decode file as UTF-8")?;
+    let mut code = String::from_utf8(contents).whatever_context("Couldn't decode file as UTF-8")?;
+    if !code.chars().last().map(|c| c == '\n').unwrap_or(false) {
+        code.push('\n');
+    }
 
     let mut lexer = Token::lexer(&code);
     let mut tokens = vec![];
