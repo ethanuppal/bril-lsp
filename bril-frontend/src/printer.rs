@@ -347,13 +347,26 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
         Ok(())
     }
 
-    pub fn print_program(&mut self, program: &ast::Program) -> fmt::Result {
-        for import in &program.imports {
-            self.print_import(import)?;
-        }
+    pub fn print_comment(&mut self, comment: &str) -> fmt::Result {
+        writeln!(self.w, "{}", comment)
+    }
 
-        for function in &program.functions {
-            self.print_function(function)?;
+    pub fn print_newline(&mut self) -> fmt::Result {
+        writeln!(self.w)
+    }
+
+    pub fn print_top_level_item(&mut self, item: &ast::TopLevelItem) -> fmt::Result {
+        match item {
+            ast::TopLevelItem::Import(import) => self.print_import(import),
+            ast::TopLevelItem::Function(function) => self.print_function(function),
+            ast::TopLevelItem::Comment(comment) => self.print_comment(comment),
+            ast::TopLevelItem::Newline(_) => self.print_newline(),
+        }
+    }
+
+    pub fn print_program(&mut self, program: &ast::Program) -> fmt::Result {
+        for item in &program.items {
+            self.print_top_level_item(item)?;
         }
 
         Ok(())

@@ -133,6 +133,13 @@ impl<'a> Token<'a> {
         )
     }
 
+    pub fn assume_comment(self) -> &'a str {
+        let Self::Comment(comment) = self else {
+            panic!("Expected comment");
+        };
+        comment
+    }
+
     pub fn assume_function_name(self) -> &'a str {
         let Self::FunctionName(function_name) = self else {
             panic!("Expected function name");

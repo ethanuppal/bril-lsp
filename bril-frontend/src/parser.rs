@@ -200,6 +200,12 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
         }
     }
 
+    pub fn skip_newlines(&mut self) {
+        while self.is_at(&Token::EmptyLine) {
+            self.advance();
+        }
+    }
+
     pub fn recover(
         &mut self,
         goals: impl IntoIterator<Item = Token<'source>>,
@@ -599,16 +605,23 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
     }
 
     pub fn parse_function_code(&mut self) -> Result<Loc<ast::FunctionCode<'source>>> {
-        if self.is_at(&Token::Label("")) {
+        if let Some(newline) = self.try_eat(Token::EmptyLine) {
+            Ok(ast::FunctionCode::EmptyLine(newline.without_inner()).at(newline))
+        } else if let Some(comment) = self.try_eat(Token::Comment("")) {
+            let comment_span = comment.span();
+            Ok(ast::FunctionCode::Comment(comment.map(Token::assume_comment)).at(comment_span))
+        } else if self.is_at(&Token::Label("")) {
             let label = self.parse_label()?;
             let colon_token = self
                 .eat(Token::Colon, "Expected colon after label in function")?
                 .without_inner();
             let start = label.span();
             let end = colon_token.span();
+            self.eat(Token::EmptyLine, "Missing newline after label")?;
             Ok(ast::FunctionCode::Label { label, colon_token }.between(start, end))
         } else {
             let instruction = self.parse_instruction()?;
+            self.eat(Token::EmptyLine, "Missing newline after instruction")?;
             let span = instruction.span();
             Ok(ast::FunctionCode::Instruction(instruction).at(span))
         }
@@ -712,12 +725,17 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
     }
 
     pub fn parse_program(&mut self) -> Result<ast::Program<'source>> {
-        let mut imports = vec![];
-        let mut functions = vec![];
+        let mut items = vec![];
         while !self.is_eof() {
-            if let Some(from_token) = self.try_eat(Token::From) {
+            if let Some(newline_token) = self.try_eat(Token::EmptyLine) {
+                items.push(ast::TopLevelItem::Newline(newline_token.without_inner()));
+            } else if let Some(comment_token) = self.try_eat(Token::Comment("")) {
+                items.push(ast::TopLevelItem::Comment(
+                    comment_token.map(Token::assume_comment),
+                ));
+            } else if let Some(from_token) = self.try_eat(Token::From) {
                 if let Ok(import) = self.parse_import(from_token.without_inner()) {
-                    imports.push(import);
+                    items.push(ast::TopLevelItem::Import(import));
                 } else {
                     self.recover(
                         [Token::Import, Token::FunctionName("")],
@@ -728,7 +746,7 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
                 if let Ok(function) =
                     self.parse_function(function_name.map(Token::assume_function_name))
                 {
-                    functions.push(function);
+                    items.push(ast::TopLevelItem::Function(function));
                 } else {
                     self.recover(
                         [Token::Import, Token::FunctionName("")],
@@ -748,7 +766,7 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
         }
 
         if self.diagnostics.is_empty() {
-            Ok(ast::Program { imports, functions })
+            Ok(ast::Program { items })
         } else {
             Err(())
         }

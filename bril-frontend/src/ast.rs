@@ -13,14 +13,14 @@ pub struct Program<'a> {
 }
 
 impl<'a> Program<'a> {
-    pub fn imports(&self) -> impl Iterator<Item = &Import<'a>> {
+    pub fn imports(&self) -> impl Iterator<Item = &Loc<Import<'a>>> {
         self.items.iter().filter_map(|item| match item {
             TopLevelItem::Import(import) => Some(import),
             _ => None,
         })
     }
 
-    pub fn functions(&self) -> impl Iterator<Item = &Function<'a>> {
+    pub fn functions(&self) -> impl Iterator<Item = &Loc<Function<'a>>> {
         self.items.iter().filter_map(|item| match item {
             TopLevelItem::Function(function) => Some(function),
             _ => None,
@@ -29,8 +29,8 @@ impl<'a> Program<'a> {
 }
 
 pub enum TopLevelItem<'a> {
-    Import(Import<'a>),
-    Function(Function<'a>),
+    Import(Loc<Import<'a>>),
+    Function(Loc<Function<'a>>),
     Comment(Loc<&'a str>),
     Newline(Loc<()>),
 }
