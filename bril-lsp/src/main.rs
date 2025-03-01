@@ -17,7 +17,7 @@ use bril_frontend::{
     ast::{Instruction, Type},
     lexer::Token,
     loc::{Loc, Span, Spanned},
-    parser::Parser,
+    parser::{Parser, ParserFailedMarker},
 };
 use dashmap::DashMap;
 use logos::Logos;
@@ -459,7 +459,10 @@ impl Backend {
                                     label.name.span(),
                                 ));
                             }
-                            bril_frontend::ast::FunctionCode::Instruction(instruction) => {
+                            bril_frontend::ast::FunctionCode::Instruction {
+                                inner: instruction,
+                                ..
+                            } => {
                                 for instruction_symbol in instruction_symbols(instruction) {
                                     hover_complete_symbols.push((
                                         LspSymbol::Variable(instruction_symbol.to_string(), None),
@@ -507,7 +510,7 @@ impl Backend {
                     },
                 );
             }
-            Err(()) => {
+            Err(ParserFailedMarker) => {
                 for diagnostic in parser.diagnostics() {
                     diagnostics.push(diagnostic_to_diagnostic(diagnostic));
                 }
