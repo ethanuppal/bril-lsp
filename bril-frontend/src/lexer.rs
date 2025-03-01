@@ -61,7 +61,7 @@ pub enum Token<'a> {
 
     #[regex("-?[0-9][0-9]*", |lexer| lexer.slice().parse().ok())]
     Integer(i64),
-    #[regex(r"-?[0-9][0-9]*\.[0-9][0-9]*", |lexer| lexer.slice().parse().ok())]
+    #[regex(r"-?[0-9]*\.[0-9][0-9]*", |lexer| lexer.slice().parse().ok())]
     Float(f64),
     #[regex("'.'", |lexer| extract_character_from_token(lexer.slice()))]
     Character(char),
