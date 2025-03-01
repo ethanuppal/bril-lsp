@@ -15,8 +15,8 @@ use crate::{
     parser::Diagnostic,
 };
 
-pub fn create_function_context(
-    functions: &[Loc<ast::Function>],
+pub fn create_function_context<'ast, 'source: 'ast>(
+    functions: impl Iterator<Item = &'ast Loc<ast::Function<'source>>>,
 ) -> HashMap<String, (Vec<Type>, Option<Type>)> {
     let mut context = HashMap::new();
     for function in functions {
@@ -96,7 +96,10 @@ pub fn type_infer_function(
     };
 
     for code in &function.body {
-        if let ast::FunctionCode::Instruction(instruction) = &**code {
+        if let ast::FunctionCode::Instruction {
+            inner: instruction, ..
+        } = &**code
+        {
             match &**instruction {
                 ast::Instruction::Constant(constant) => {
                     let mut inferred_type = match &*constant.value {

@@ -63,8 +63,12 @@ pub enum FunctionCode<'a> {
     Label {
         label: Loc<Label<'a>>,
         colon_token: Loc<()>,
+        comment: Option<Loc<&'a str>>,
     },
-    Instruction(Loc<Instruction<'a>>),
+    Instruction {
+        inner: Loc<Instruction<'a>>,
+        comment: Option<Loc<&'a str>>,
+    },
     Comment(Loc<&'a str>),
     EmptyLine(Loc<()>),
 }

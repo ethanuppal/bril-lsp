@@ -388,8 +388,8 @@ impl Backend {
         match parser.parse_program() {
             Ok(program) => {
                 let context =
-                    bril_frontend::infer_types::create_function_context(&program.functions);
-                for function in &program.functions {
+                    bril_frontend::infer_types::create_function_context(program.functions());
+                for function in program.functions() {
                     if let Err(diagnostic) =
                         bril_frontend::infer_types::type_infer_function(&context, function)
                     {
@@ -403,7 +403,7 @@ impl Backend {
                 let mut document_symbols = vec![];
                 let mut hover_complete_symbols = vec![];
 
-                for import in &program.imports {
+                for import in program.imports() {
                     document_symbols.push(document_symbol(
                         &import.path,
                         None,
@@ -439,7 +439,7 @@ impl Backend {
                     }
                 }
 
-                for function in &program.functions {
+                for function in program.functions() {
                     let mut children = vec![];
 
                     for code in &function.body {
@@ -467,6 +467,7 @@ impl Backend {
                                     ));
                                 }
                             }
+                            _ => {}
                         }
                     }
 

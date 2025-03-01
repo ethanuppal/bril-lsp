@@ -34,9 +34,9 @@ macro_rules! type_snapshot {
             };
 
             use std::fmt::Write;
-            let context = bril_frontend::infer_types::create_function_context(&program.functions);
+            let context = bril_frontend::infer_types::create_function_context(program.functions());
             let mut snapshot = String::new();
-            for function in &program.functions {
+            for function in program.functions() {
                 let env = match bril_frontend::infer_types::type_infer_function(&context, function)
                 {
                     Ok(result) => result,
@@ -102,8 +102,8 @@ macro_rules! type_error {
                 panic!("Failed to parse program");
             };
 
-            let context = bril_frontend::infer_types::create_function_context(&program.functions);
-            for function in &program.functions {
+            let context = bril_frontend::infer_types::create_function_context(program.functions());
+            for function in program.functions() {
                 if let Err(diagnostic) =
                     bril_frontend::infer_types::type_infer_function(&context, function)
                 {

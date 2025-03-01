@@ -102,7 +102,7 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
         }
         write!(self.w, " = const ")?;
         self.print_constant_value(&constant.value)?;
-        writeln!(self.w, ";")
+        write!(self.w, ";")
     }
 
     pub fn print_value_operation_op(
@@ -224,7 +224,7 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
         }
         write!(self.w, " = ")?;
         self.print_value_operation_op(&value_operation.op)?;
-        writeln!(self.w, ";")
+        write!(self.w, ";")
     }
 
     pub fn print_effect_operation_op(
@@ -285,7 +285,7 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
         effect_operation: &ast::EffectOperation,
     ) -> fmt::Result {
         self.print_effect_operation_op(&effect_operation.op)?;
-        writeln!(self.w, ";")
+        write!(self.w, ";")
     }
 
     pub fn print_instruction(&mut self, instruction: &ast::Instruction) -> fmt::Result {
@@ -302,14 +302,23 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
 
     pub fn print_function_code(&mut self, code: &ast::FunctionCode) -> fmt::Result {
         match code {
-            ast::FunctionCode::Label { label, .. } => {
+            ast::FunctionCode::Label { label, comment, .. } => {
                 self.w.decrease_indent();
                 self.print_label(label)?;
-                writeln!(self.w, ":")?;
+                write!(self.w, ":")?;
                 self.w.increase_indent();
-                Ok(())
+                if let Some(comment) = comment {
+                    writeln!(self.w, " {}", comment)?;
+                }
+                writeln!(self.w)
             }
-            ast::FunctionCode::Instruction(instruction) => self.print_instruction(instruction),
+            ast::FunctionCode::Instruction { inner, comment } => {
+                self.print_instruction(inner)?;
+                if let Some(comment) = comment {
+                    writeln!(self.w, " {}", comment)?;
+                }
+                writeln!(self.w)
+            }
             ast::FunctionCode::Comment(comment) => {
                 writeln!(self.w, "{}", comment)
             }

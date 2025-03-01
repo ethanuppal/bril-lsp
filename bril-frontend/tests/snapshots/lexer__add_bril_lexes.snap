@@ -16,6 +16,10 @@ LexerSnapshot {
             span: 6..7,
         },
         Loc {
+            inner: Newline,
+            span: 7..8,
+        },
+        Loc {
             inner: Identifier(
                 "v0",
             ),
@@ -52,6 +56,10 @@ LexerSnapshot {
             span: 27..28,
         },
         Loc {
+            inner: Newline,
+            span: 28..29,
+        },
+        Loc {
             inner: Identifier(
                 "v1",
             ),
@@ -86,6 +94,10 @@ LexerSnapshot {
         Loc {
             inner: Semi,
             span: 48..49,
+        },
+        Loc {
+            inner: Newline,
+            span: 49..50,
         },
         Loc {
             inner: Identifier(
@@ -130,6 +142,10 @@ LexerSnapshot {
             span: 71..72,
         },
         Loc {
+            inner: Newline,
+            span: 72..73,
+        },
+        Loc {
             inner: Identifier(
                 "print",
             ),
@@ -146,8 +162,16 @@ LexerSnapshot {
             span: 83..84,
         },
         Loc {
+            inner: Newline,
+            span: 84..85,
+        },
+        Loc {
             inner: RightBrace,
             span: 85..86,
+        },
+        Loc {
+            inner: Newline,
+            span: 86..87,
         },
     ],
 }

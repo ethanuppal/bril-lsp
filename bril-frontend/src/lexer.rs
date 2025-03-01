@@ -17,10 +17,10 @@ pub fn extract_character_from_token(slice: &str) -> Option<char> {
 #[derive(Logos, Debug)]
 #[logos(skip r"[ \t\f]+")]
 pub enum Token<'a> {
-    #[regex(r"[ \t\n\f]*(#[^\n]*)\n")]
+    #[regex(r"#[^\n]*", |lexer| lexer.slice().trim())]
     Comment(&'a str),
-    #[regex(r"[ \t\n\f]*\n")]
-    EmptyLine,
+    #[token("\n")]
+    Newline,
 
     #[token("import")]
     Import,
@@ -75,7 +75,7 @@ impl Token<'_> {
     pub fn pattern_name(&self) -> &'static str {
         match self {
             Self::Comment(_) => "<comment>",
-            Self::EmptyLine => "<empty line>",
+            Self::Newline => "<newline>",
             Self::Import => "import",
             Self::From => "from",
             Self::As => "as",
@@ -107,7 +107,7 @@ impl<'a> Token<'a> {
         matches!(
             (self, pattern),
             (Self::Comment(_), Self::Comment(_))
-                | (Self::EmptyLine, Self::EmptyLine)
+                | (Self::Newline, Self::Newline)
                 | (Self::Import, Self::Import)
                 | (Self::From, Self::From)
                 | (Self::As, Self::As)
@@ -206,7 +206,7 @@ impl Clone for Token<'_> {
     fn clone(&self) -> Self {
         match self {
             Self::Comment(comment) => Self::Comment(comment),
-            Self::EmptyLine => Self::EmptyLine,
+            Self::Newline => Self::Newline,
             Self::Import => Self::Import,
             Self::From => Self::From,
             Self::As => Self::As,

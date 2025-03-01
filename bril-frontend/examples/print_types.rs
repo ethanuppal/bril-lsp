@@ -75,9 +75,9 @@ fn main() -> Result<(), Whatever> {
         whatever!("Exiting due to errors");
     };
 
-    let context = infer_types::create_function_context(&program.functions);
+    let context = infer_types::create_function_context(program.functions());
     let mut snapshot = String::new();
-    for function in &program.functions {
+    for function in program.functions() {
         let env = match infer_types::type_infer_function(&context, function) {
             Ok(result) => result,
             Err(diagnostic) => {
