@@ -367,6 +367,8 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
             "Failed to parse imported function",
         )?;
 
+        let _ = self.eat(Token::Newline, "Expected newline after import")?;
+
         Ok(ast::Import {
             from_token: from_token.clone(),
             path,
@@ -617,7 +619,7 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
             let empty_line_span = newline_token.span();
             Ok(ast::FunctionCode::EmptyLine(newline_token.without_inner()).at(empty_line_span))
         } else if let Some(comment) = self.try_eat(Token::Comment("")) {
-            self.eat(Token::Newline, "Expected newline after comment")?;
+            let _ = self.eat(Token::Newline, "Expected newline after comment")?;
             let comment_span = comment.span();
             Ok(ast::FunctionCode::Comment(comment.map(Token::assume_comment)).at(comment_span))
         } else if self.is_at(&Token::Label("")) {
@@ -632,7 +634,7 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
                 .try_eat(Token::Comment(""))
                 .map(|comment| comment.map(Token::assume_comment));
 
-            self.eat(Token::Newline, "Missing newline after label")?;
+            let _ = self.eat(Token::Newline, "Missing newline after label")?;
             Ok(ast::FunctionCode::Label {
                 label,
                 colon_token,
@@ -646,7 +648,7 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
                 .try_eat(Token::Comment(""))
                 .map(|comment| comment.map(Token::assume_comment));
 
-            self.eat(Token::Newline, "Missing newline after instruction")?;
+            let _ = self.eat(Token::Newline, "Missing newline after instruction")?;
             let span = instruction.span();
             Ok(ast::FunctionCode::Instruction {
                 inner: instruction,
@@ -777,7 +779,7 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
                 // single newline
                 self.advance();
             } else if let Some(comment_token) = self.try_eat(Token::Comment("")) {
-                self.eat(Token::Newline, "Expected newline after comment")?;
+                let _ = self.eat(Token::Newline, "Expected newline after comment")?;
                 items.push(ast::TopLevelItem::Comment(
                     comment_token.map(Token::assume_comment),
                 ));

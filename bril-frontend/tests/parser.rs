@@ -67,7 +67,7 @@ macro_rules! parser_error {
 
             let mut parser = bril_frontend::parser::Parser::new(&tokens);
 
-            let Err(()) = parser.parse_program() else {
+            let Err(bril_frontend::parser::ParserFailedMarker) = parser.parse_program() else {
                 panic!("Parsing invalid program should have produced an error");
             };
 
