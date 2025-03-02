@@ -64,3 +64,20 @@ jobs:
         run: |
           cd bril-frontend/bril-programs
           turnt core_benchmarks_copied/*.bril
+  
+  test_formatter:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-15]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Clone Bril
+        run: git clone https://github.com/sampsyo/bril && cd bril && git reset --hard bc60765c822852ab574fe8238d33dbe064a94943
+
+      - name: Check idempotency
+        run: |
+          cd brilfmt
+          python3 check_idempotency.py ../bril/benchmarks/**/*.bril

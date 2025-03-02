@@ -1,0 +1,12 @@
+[package]
+name = "brilfmt"
+description = "Formats Bril code"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+bril-frontend = { path = "../bril-frontend/", version = "0.3.0" }
+logos.workspace = true
+snafu.workspace = true
+annotate-snippets.workspace = true

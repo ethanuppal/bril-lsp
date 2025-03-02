@@ -1,6 +1,11 @@
 [workspace]
 resolver = "2"
-members = ["bril-frontend", "bril-frontend/tests/check-lossless", "bril-lsp"]
+members = [
+  "bril-frontend",
+  "bril-frontend/tests/check-lossless",
+  "bril-lsp",
+  "brilfmt",
+]
 
 [workspace.package]
 edition = "2021"
