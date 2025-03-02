@@ -53,7 +53,10 @@ fn main() -> Result<(), Whatever> {
     reader
         .read_to_end(&mut contents)
         .whatever_context(format!("Failed to read {}", file))?;
-    let code = String::from_utf8(contents).whatever_context("Couldn't decode file as UTF-8")?;
+    let mut code = String::from_utf8(contents).whatever_context("Couldn't decode file as UTF-8")?;
+    if !code.chars().last().map(|c| c == '\n').unwrap_or(false) {
+        code.push('\n');
+    }
 
     let mut lexer = Token::lexer(&code);
     let mut tokens = vec![];
@@ -75,9 +78,9 @@ fn main() -> Result<(), Whatever> {
         whatever!("Exiting due to errors");
     };
 
-    let context = infer_types::create_function_context(&program.functions);
+    let context = infer_types::create_function_context(program.functions());
     let mut snapshot = String::new();
-    for function in &program.functions {
+    for function in program.functions() {
         let env = match infer_types::type_infer_function(&context, function) {
             Ok(result) => result,
             Err(diagnostic) => {
@@ -93,10 +96,7 @@ fn main() -> Result<(), Whatever> {
             let _ = writeln!(&mut snapshot, "  {}: {}", variable, ty);
         }
     }
-    println!(
-        "PROGRAM\n--------\n{}\n\nTYPES\n-------\n{}",
-        code, snapshot
-    );
+    println!("PROGRAM\n--------\n{}\nTYPES\n-------\n{}", code, snapshot);
 
     Ok(())
 }

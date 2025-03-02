@@ -48,7 +48,6 @@ PROGRAM
   ret tmp22;
 }
 
-
 TYPES
 -------
 FUNCTION @main

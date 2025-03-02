@@ -28,7 +28,6 @@ PROGRAM
   call @hanoi disks src dst spare;
 }
 
-
 TYPES
 -------
 FUNCTION @hanoi

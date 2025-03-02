@@ -3,7 +3,7 @@ source: bril-frontend/tests/lexer.rs
 expression: "LexerSnapshot { code, tokens }"
 ---
 LexerSnapshot {
-    code: "import from as @main .foo foo \"path/to/lol\" {}:<>;=,() 5 5.0 'a'",
+    code: "import from as @main .foo foo \"path/to/lol\" {}:<>;=,() 5 5.0 'a'\n# test foo\n# abr\n\n# baz\n    ",
     tokens: [
         Loc {
             inner: Import,
@@ -98,6 +98,44 @@ LexerSnapshot {
                 'a',
             ),
             span: 61..64,
+        },
+        Loc {
+            inner: Newline,
+            span: 64..65,
+        },
+        Loc {
+            inner: Comment(
+                "# test foo",
+            ),
+            span: 65..75,
+        },
+        Loc {
+            inner: Newline,
+            span: 75..76,
+        },
+        Loc {
+            inner: Comment(
+                "# abr",
+            ),
+            span: 76..81,
+        },
+        Loc {
+            inner: Newline,
+            span: 81..82,
+        },
+        Loc {
+            inner: Newline,
+            span: 82..83,
+        },
+        Loc {
+            inner: Comment(
+                "# baz",
+            ),
+            span: 83..88,
+        },
+        Loc {
+            inner: Newline,
+            span: 88..89,
         },
     ],
 }

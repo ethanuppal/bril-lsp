@@ -17,7 +17,7 @@ use bril_frontend::{
     ast::{Instruction, Type},
     lexer::Token,
     loc::{Loc, Span, Spanned},
-    parser::Parser,
+    parser::{Parser, ParserFailedMarker},
 };
 use dashmap::DashMap;
 use logos::Logos;
@@ -388,8 +388,8 @@ impl Backend {
         match parser.parse_program() {
             Ok(program) => {
                 let context =
-                    bril_frontend::infer_types::create_function_context(&program.functions);
-                for function in &program.functions {
+                    bril_frontend::infer_types::create_function_context(program.functions());
+                for function in program.functions() {
                     if let Err(diagnostic) =
                         bril_frontend::infer_types::type_infer_function(&context, function)
                     {
@@ -403,7 +403,7 @@ impl Backend {
                 let mut document_symbols = vec![];
                 let mut hover_complete_symbols = vec![];
 
-                for import in &program.imports {
+                for import in program.imports() {
                     document_symbols.push(document_symbol(
                         &import.path,
                         None,
@@ -439,7 +439,7 @@ impl Backend {
                     }
                 }
 
-                for function in &program.functions {
+                for function in program.functions() {
                     let mut children = vec![];
 
                     for code in &function.body {
@@ -459,7 +459,10 @@ impl Backend {
                                     label.name.span(),
                                 ));
                             }
-                            bril_frontend::ast::FunctionCode::Instruction(instruction) => {
+                            bril_frontend::ast::FunctionCode::Instruction {
+                                inner: instruction,
+                                ..
+                            } => {
                                 for instruction_symbol in instruction_symbols(instruction) {
                                     hover_complete_symbols.push((
                                         LspSymbol::Variable(instruction_symbol.to_string(), None),
@@ -467,6 +470,7 @@ impl Backend {
                                     ));
                                 }
                             }
+                            _ => {}
                         }
                     }
 
@@ -506,7 +510,7 @@ impl Backend {
                     },
                 );
             }
-            Err(()) => {
+            Err(ParserFailedMarker) => {
                 for diagnostic in parser.diagnostics() {
                     diagnostics.push(diagnostic_to_diagnostic(diagnostic));
                 }

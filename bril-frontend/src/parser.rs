@@ -43,7 +43,9 @@ pub struct Parser<'tokens, 'source: 'tokens> {
     diagnostics: Vec<Diagnostic>,
 }
 
-pub type Result<T> = std::result::Result<T, ()>;
+pub struct ParserFailedMarker;
+
+pub type Result<T> = std::result::Result<T, ParserFailedMarker>;
 
 macro_rules! try_op {
     (@parse_argument; $self:ident; Token::Identifier) => {
@@ -138,6 +140,12 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
             .is_some()
     }
 
+    pub fn next_is(&self, pattern: &Token) -> bool {
+        self.get(1)
+            .filter(|token| token.matches_against(pattern.clone()))
+            .is_some()
+    }
+
     pub fn advance(&mut self) {
         self.index += 1;
     }
@@ -196,7 +204,13 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
                 );
             }
 
-            Err(())
+            Err(ParserFailedMarker)
+        }
+    }
+
+    pub fn skip_newlines(&mut self) {
+        while self.is_at(&Token::Newline) {
+            self.advance();
         }
     }
 
@@ -271,7 +285,7 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
                         )
                         .explain(message),
                     );
-                    return Err(());
+                    return Err(ParserFailedMarker);
                 }
             }
 
@@ -292,7 +306,7 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
             )
             .explain(message),
         );
-        Err(())
+        Err(ParserFailedMarker)
     }
 
     pub fn parse_local_name(&mut self, message: impl Into<String>) -> Result<Loc<&'source str>> {
@@ -353,6 +367,8 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
             "Failed to parse imported function",
         )?;
 
+        let _ = self.eat(Token::Newline, "Expected newline after import")?;
+
         Ok(ast::Import {
             from_token: from_token.clone(),
             path,
@@ -399,7 +415,7 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
                 )
                 .explain("This is not a valid constant value"),
             );
-            Err(())
+            Err(ParserFailedMarker)
         }
     }
 
@@ -477,7 +493,7 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
                 .explain("If this is a valid operation name, file an issue at <https://github.com/ethanuppal/bril-lsp>"),
         );
 
-        Err(())
+        Err(ParserFailedMarker)
     }
 
     pub fn parse_value_operation(
@@ -530,7 +546,7 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
                 .explain("If this is a valid operation name, file an issue at <https://github.com/ethanuppal/bril-lsp>"),
         );
 
-        Err(())
+        Err(ParserFailedMarker)
     }
 
     pub fn parse_effect_operation(&mut self) -> Result<Loc<ast::EffectOperation<'source>>> {
@@ -599,18 +615,46 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
     }
 
     pub fn parse_function_code(&mut self) -> Result<Loc<ast::FunctionCode<'source>>> {
-        if self.is_at(&Token::Label("")) {
+        if let Some(newline_token) = self.try_eat(Token::Newline) {
+            let empty_line_span = newline_token.span();
+            Ok(ast::FunctionCode::EmptyLine(newline_token.without_inner()).at(empty_line_span))
+        } else if let Some(comment) = self.try_eat(Token::Comment("")) {
+            let _ = self.eat(Token::Newline, "Expected newline after comment")?;
+            let comment_span = comment.span();
+            Ok(ast::FunctionCode::Comment(comment.map(Token::assume_comment)).at(comment_span))
+        } else if self.is_at(&Token::Label("")) {
             let label = self.parse_label()?;
             let colon_token = self
                 .eat(Token::Colon, "Expected colon after label in function")?
                 .without_inner();
             let start = label.span();
             let end = colon_token.span();
-            Ok(ast::FunctionCode::Label { label, colon_token }.between(start, end))
+
+            let comment = self
+                .try_eat(Token::Comment(""))
+                .map(|comment| comment.map(Token::assume_comment));
+
+            let _ = self.eat(Token::Newline, "Missing newline after label")?;
+            Ok(ast::FunctionCode::Label {
+                label,
+                colon_token,
+                comment,
+            }
+            .between(start, end))
         } else {
             let instruction = self.parse_instruction()?;
+
+            let comment = self
+                .try_eat(Token::Comment(""))
+                .map(|comment| comment.map(Token::assume_comment));
+
+            let _ = self.eat(Token::Newline, "Missing newline after instruction")?;
             let span = instruction.span();
-            Ok(ast::FunctionCode::Instruction(instruction).at(span))
+            Ok(ast::FunctionCode::Instruction {
+                inner: instruction,
+                comment,
+            }
+            .at(span))
         }
     }
 
@@ -636,7 +680,7 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
             _ => {
                 self.diagnostics
                     .push(Diagnostic::new("Unknown type", ty).explain("This is not a valid type"));
-                return Err(());
+                return Err(ParserFailedMarker);
             }
         })
     }
@@ -645,6 +689,7 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
         let colon_token = self
             .eat(Token::Colon, "Need colon before type in type annotation")?
             .without_inner();
+        self.skip_newlines();
         let ty = self.parse_type()?;
         let start = colon_token.span();
         let end = ty.span();
@@ -654,8 +699,11 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
     pub fn parse_function_parameter(
         &mut self,
     ) -> Result<(Loc<&'source str>, Loc<ast::TypeAnnotation>)> {
+        self.skip_newlines();
         let name = self.parse_local_name("Expected parameter name")?;
+        self.skip_newlines();
         let annotation = self.parse_type_annotation()?;
+        self.skip_newlines();
         Ok((name, annotation))
     }
 
@@ -675,13 +723,19 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
             vec![]
         };
 
+        self.skip_newlines();
+
         let return_type = if self.is_at(&Token::Colon) {
             Some(self.parse_type_annotation()?)
         } else {
             None
         };
 
+        self.skip_newlines();
+
         self.eat(Token::LeftBrace, "Missing left brace to open function")?;
+
+        self.skip_newlines();
 
         let mut body = vec![];
         while !self.is_eof() && !self.is_at(&Token::RightBrace) {
@@ -693,7 +747,7 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
                 self.index = index;
                 self.recover([Token::Semi, Token::RightBrace], "Failed to find another label or instruction in this function body to recover from");
                 if self.is_eof() || self.is_at(&Token::RightBrace) {
-                    return Err(());
+                    return Err(ParserFailedMarker);
                 } else {
                     self.advance();
                 }
@@ -701,6 +755,8 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
         }
 
         let end = self.eat(Token::RightBrace, "Missing left brace to open function")?;
+
+        let _ = self.try_eat(Token::Newline);
 
         Ok(ast::Function {
             name: name.clone(),
@@ -712,12 +768,24 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
     }
 
     pub fn parse_program(&mut self) -> Result<ast::Program<'source>> {
-        let mut imports = vec![];
-        let mut functions = vec![];
+        self.skip_newlines();
+
+        let mut items = vec![];
         while !self.is_eof() {
-            if let Some(from_token) = self.try_eat(Token::From) {
+            if let Some(newline_token) = self.try_eat(Token::Newline) {
+                items.push(ast::TopLevelItem::Newline(newline_token.without_inner()));
+                self.skip_newlines();
+            } else if self.is_at(&Token::Newline) {
+                // single newline
+                self.advance();
+            } else if let Some(comment_token) = self.try_eat(Token::Comment("")) {
+                let _ = self.eat(Token::Newline, "Expected newline after comment")?;
+                items.push(ast::TopLevelItem::Comment(
+                    comment_token.map(Token::assume_comment),
+                ));
+            } else if let Some(from_token) = self.try_eat(Token::From) {
                 if let Ok(import) = self.parse_import(from_token.without_inner()) {
-                    imports.push(import);
+                    items.push(ast::TopLevelItem::Import(import));
                 } else {
                     self.recover(
                         [Token::Import, Token::FunctionName("")],
@@ -728,7 +796,7 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
                 if let Ok(function) =
                     self.parse_function(function_name.map(Token::assume_function_name))
                 {
-                    functions.push(function);
+                    items.push(ast::TopLevelItem::Function(function));
                 } else {
                     self.recover(
                         [Token::Import, Token::FunctionName("")],
@@ -748,9 +816,9 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
         }
 
         if self.diagnostics.is_empty() {
-            Ok(ast::Program { imports, functions })
+            Ok(ast::Program { items })
         } else {
-            Err(())
+            Err(ParserFailedMarker)
         }
     }
 }

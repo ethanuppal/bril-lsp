@@ -32,7 +32,6 @@ PROGRAM
   ret v11;
 }
 
-
 TYPES
 -------
 FUNCTION @main

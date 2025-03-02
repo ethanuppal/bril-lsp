@@ -48,7 +48,6 @@ PROGRAM
   ret v24;
 }
 
-
 TYPES
 -------
 FUNCTION @main

@@ -20,7 +20,6 @@ PROGRAM
       ret area;
 }
 
-
 TYPES
 -------
 FUNCTION @main

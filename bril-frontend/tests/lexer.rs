@@ -27,6 +27,7 @@ macro_rules! lexer_snapshot {
             let mut lexer = bril_frontend::lexer::Token::lexer(code);
             let mut tokens = vec![];
             while let Some(next) = lexer.next() {
+                eprintln!("{next:?}");
                 if let Ok(token) = next {
                     tokens.push(Loc::new(token, lexer.span()));
                 } else {
@@ -50,6 +51,7 @@ macro_rules! lexer_error {
             let mut lexer = bril_frontend::lexer::Token::lexer(code);
             let mut tokens = vec![];
             while let Some(next) = lexer.next() {
+                eprintln!("{next:?}");
                 if let Ok(token) = next {
                     tokens.push(Loc::new(token, lexer.span()));
                 } else {
@@ -73,7 +75,12 @@ macro_rules! lexer_error {
 
 lexer_snapshot! {
     all_tokens_work,
-    r#"import from as @main .foo foo "path/to/lol" {}:<>;=,() 5 5.0 'a'"#
+    r#"import from as @main .foo foo "path/to/lol" {}:<>;=,() 5 5.0 'a'
+# test foo
+# abr
+
+# baz
+    "#
 }
 
 lexer_snapshot! {

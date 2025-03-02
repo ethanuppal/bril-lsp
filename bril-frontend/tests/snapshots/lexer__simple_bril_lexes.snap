@@ -24,6 +24,10 @@ LexerSnapshot {
             span: 8..9,
         },
         Loc {
+            inner: Newline,
+            span: 9..10,
+        },
+        Loc {
             inner: Label(
                 ".test",
             ),
@@ -32,6 +36,10 @@ LexerSnapshot {
         Loc {
             inner: Colon,
             span: 15..16,
+        },
+        Loc {
+            inner: Newline,
+            span: 16..17,
         },
         Loc {
             inner: Identifier(
@@ -70,8 +78,16 @@ LexerSnapshot {
             span: 35..36,
         },
         Loc {
+            inner: Newline,
+            span: 36..37,
+        },
+        Loc {
             inner: RightBrace,
             span: 37..38,
+        },
+        Loc {
+            inner: Newline,
+            span: 38..39,
         },
     ],
 }

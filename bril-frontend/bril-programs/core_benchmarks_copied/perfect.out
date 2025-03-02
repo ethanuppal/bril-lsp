@@ -34,7 +34,6 @@ PROGRAM
   print result;
 }
 
-
 TYPES
 -------
 FUNCTION @main

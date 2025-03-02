@@ -59,7 +59,6 @@ PROGRAM
   ret res;
 }
 
-
 TYPES
 -------
 FUNCTION @main

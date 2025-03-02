@@ -73,7 +73,6 @@ PROGRAM
 .for.end.0:
 }
 
-
 TYPES
 -------
 FUNCTION @main

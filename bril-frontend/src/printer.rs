@@ -102,7 +102,7 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
         }
         write!(self.w, " = const ")?;
         self.print_constant_value(&constant.value)?;
-        writeln!(self.w, ";")
+        write!(self.w, ";")
     }
 
     pub fn print_value_operation_op(
@@ -224,7 +224,7 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
         }
         write!(self.w, " = ")?;
         self.print_value_operation_op(&value_operation.op)?;
-        writeln!(self.w, ";")
+        write!(self.w, ";")
     }
 
     pub fn print_effect_operation_op(
@@ -285,7 +285,7 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
         effect_operation: &ast::EffectOperation,
     ) -> fmt::Result {
         self.print_effect_operation_op(&effect_operation.op)?;
-        writeln!(self.w, ";")
+        write!(self.w, ";")
     }
 
     pub fn print_instruction(&mut self, instruction: &ast::Instruction) -> fmt::Result {
@@ -302,14 +302,27 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
 
     pub fn print_function_code(&mut self, code: &ast::FunctionCode) -> fmt::Result {
         match code {
-            ast::FunctionCode::Label { label, .. } => {
+            ast::FunctionCode::Label { label, comment, .. } => {
                 self.w.decrease_indent();
                 self.print_label(label)?;
-                writeln!(self.w, ":")?;
+                write!(self.w, ":")?;
                 self.w.increase_indent();
-                Ok(())
+                if let Some(comment) = comment {
+                    writeln!(self.w, " {}", comment)?;
+                }
+                writeln!(self.w)
             }
-            ast::FunctionCode::Instruction(instruction) => self.print_instruction(instruction),
+            ast::FunctionCode::Instruction { inner, comment } => {
+                self.print_instruction(inner)?;
+                if let Some(comment) = comment {
+                    writeln!(self.w, " {}", comment)?;
+                }
+                writeln!(self.w)
+            }
+            ast::FunctionCode::Comment(comment) => {
+                writeln!(self.w, "{}", comment)
+            }
+            ast::FunctionCode::EmptyLine(_) => writeln!(self.w),
         }
     }
 
@@ -343,13 +356,26 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
         Ok(())
     }
 
-    pub fn print_program(&mut self, program: &ast::Program) -> fmt::Result {
-        for import in &program.imports {
-            self.print_import(import)?;
-        }
+    pub fn print_comment(&mut self, comment: &str) -> fmt::Result {
+        writeln!(self.w, "{}", comment)
+    }
 
-        for function in &program.functions {
-            self.print_function(function)?;
+    pub fn print_newline(&mut self) -> fmt::Result {
+        writeln!(self.w)
+    }
+
+    pub fn print_top_level_item(&mut self, item: &ast::TopLevelItem) -> fmt::Result {
+        match item {
+            ast::TopLevelItem::Import(import) => self.print_import(import),
+            ast::TopLevelItem::Function(function) => self.print_function(function),
+            ast::TopLevelItem::Comment(comment) => self.print_comment(comment),
+            ast::TopLevelItem::Newline(_) => self.print_newline(),
+        }
+    }
+
+    pub fn print_program(&mut self, program: &ast::Program) -> fmt::Result {
+        for item in &program.items {
+            self.print_top_level_item(item)?;
         }
 
         Ok(())

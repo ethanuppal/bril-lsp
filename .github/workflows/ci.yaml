@@ -34,7 +34,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
 
       - name: Clone Bril
-        run: git clone https://github.com/sampsyo/bril && cd bril && git reset --hard 94764e92585c7133d08ac14cf3c563d1d272434a
+        run: git clone https://github.com/sampsyo/bril && cd bril && git reset --hard bc60765c822852ab574fe8238d33dbe064a94943
 
       - uses: actions/setup-python@v4
         with:

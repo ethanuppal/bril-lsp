@@ -41,7 +41,6 @@ PROGRAM
   print v1;
 }
 
-
 TYPES
 -------
 FUNCTION @main

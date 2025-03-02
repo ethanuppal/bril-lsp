@@ -28,7 +28,6 @@ PROGRAM
   v14: int = const 0;
 }
 
-
 TYPES
 -------
 FUNCTION @main

@@ -74,7 +74,6 @@ PROGRAM
   v7: int = id diff;
 }
 
-
 TYPES
 -------
 FUNCTION @sumOfSquares

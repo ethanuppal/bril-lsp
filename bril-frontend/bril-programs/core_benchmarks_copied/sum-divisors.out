@@ -45,7 +45,6 @@ PROGRAM
   ret diff;
 }
 
-
 TYPES
 -------
 FUNCTION @main

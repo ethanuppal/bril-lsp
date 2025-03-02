@@ -15,10 +15,12 @@ pub fn extract_character_from_token(slice: &str) -> Option<char> {
 }
 
 #[derive(Logos, Debug)]
-#[logos(skip r"[ \t\n\f]+")]
+#[logos(skip r"[ \t\f]+")]
 pub enum Token<'a> {
-    #[regex(r"#[^\n]*\n", logos::skip)]
-    Comment,
+    #[regex(r"#[^\n]*", |lexer| lexer.slice().trim())]
+    Comment(&'a str),
+    #[token("\n")]
+    Newline,
 
     #[token("import")]
     Import,
@@ -59,7 +61,7 @@ pub enum Token<'a> {
 
     #[regex("-?[0-9][0-9]*", |lexer| lexer.slice().parse().ok())]
     Integer(i64),
-    #[regex(r"-?[0-9][0-9]*\.[0-9][0-9]*", |lexer| lexer.slice().parse().ok())]
+    #[regex(r"-?[0-9]*\.[0-9][0-9]*", |lexer| lexer.slice().parse().ok())]
     Float(f64),
     #[regex("'.'", |lexer| extract_character_from_token(lexer.slice()))]
     Character(char),
@@ -72,7 +74,8 @@ pub enum Token<'a> {
 impl Token<'_> {
     pub fn pattern_name(&self) -> &'static str {
         match self {
-            Self::Comment => unreachable!(),
+            Self::Comment(_) => "<comment>",
+            Self::Newline => "<newline>",
             Self::Import => "import",
             Self::From => "from",
             Self::As => "as",
@@ -103,7 +106,9 @@ impl<'a> Token<'a> {
     pub fn matches_against(&self, pattern: Token<'a>) -> bool {
         matches!(
             (self, pattern),
-            (Self::Import, Self::Import)
+            (Self::Comment(_), Self::Comment(_))
+                | (Self::Newline, Self::Newline)
+                | (Self::Import, Self::Import)
                 | (Self::From, Self::From)
                 | (Self::As, Self::As)
                 | (Self::FunctionName(_), Self::FunctionName(_))
@@ -126,6 +131,13 @@ impl<'a> Token<'a> {
                 | (Self::True, Self::True)
                 | (Self::False, Self::False)
         )
+    }
+
+    pub fn assume_comment(self) -> &'a str {
+        let Self::Comment(comment) = self else {
+            panic!("Expected comment");
+        };
+        comment
     }
 
     pub fn assume_function_name(self) -> &'a str {
@@ -193,7 +205,8 @@ impl<'a> Token<'a> {
 impl Clone for Token<'_> {
     fn clone(&self) -> Self {
         match self {
-            Self::Comment => unreachable!(),
+            Self::Comment(comment) => Self::Comment(comment),
+            Self::Newline => Self::Newline,
             Self::Import => Self::Import,
             Self::From => Self::From,
             Self::As => Self::As,

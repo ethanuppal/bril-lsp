@@ -80,7 +80,6 @@ PROGRAM
   print ans2;
 }
 
-
 TYPES
 -------
 FUNCTION @pow
