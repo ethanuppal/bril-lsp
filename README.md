@@ -12,6 +12,10 @@ This monorepo contains:
   
   [![Crates.io Version](https://img.shields.io/crates/v/bril-lsp)](https://crates.io/crates/bril-lsp)
   ![Crates.io License](https://img.shields.io/crates/l/bril-lsp)
+- [`brilfmt`](./brilfmt/): A formatter for Bril programs in their textual format
+  
+  [![Crates.io Version](https://img.shields.io/crates/v/brilfmt)](https://crates.io/crates/brilfmt)
+  ![Crates.io License](https://img.shields.io/crates/l/brilfmt)
 - [`bril.nvim`](https://github.com/ethanuppal/bril.nvim/tree/main): Neovim plugin for lazy.nvim
 - [`bril-vscode`](./bril-vscode/): Install the VSCode extension here: https://marketplace.visualstudio.com/items?itemName=EthanUppal.bril
 
