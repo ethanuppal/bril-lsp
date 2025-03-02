@@ -39,7 +39,6 @@ PROGRAM
     ret sum;
 }
 
-
 TYPES
 -------
 FUNCTION @main

@@ -95,7 +95,6 @@ PROGRAM
   call @orders u n use_lcm;
 }
 
-
 TYPES
 -------
 FUNCTION @abs

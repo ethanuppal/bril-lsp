@@ -28,7 +28,6 @@ PROGRAM
   ret v10;
 }
 
-
 TYPES
 -------
 FUNCTION @main

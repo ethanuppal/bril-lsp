@@ -42,7 +42,6 @@ PROGRAM
 .finish:
 }
 
-
 TYPES
 -------
 FUNCTION @main

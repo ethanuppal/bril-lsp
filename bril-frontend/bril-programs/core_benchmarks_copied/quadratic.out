@@ -78,7 +78,6 @@ PROGRAM
   v31: int = const 0;
 }
 
-
 TYPES
 -------
 FUNCTION @main

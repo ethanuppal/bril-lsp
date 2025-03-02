@@ -59,7 +59,6 @@ PROGRAM
   ret t3;
 }
 
-
 TYPES
 -------
 FUNCTION @main

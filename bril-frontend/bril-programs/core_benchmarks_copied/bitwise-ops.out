@@ -96,7 +96,6 @@ PROGRAM
   print ans;
 }
 
-
 TYPES
 -------
 FUNCTION @mod2

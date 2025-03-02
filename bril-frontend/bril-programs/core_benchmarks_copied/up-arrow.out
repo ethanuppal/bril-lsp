@@ -37,7 +37,6 @@ PROGRAM
   ret ans;
 }
 
-
 TYPES
 -------
 FUNCTION @main

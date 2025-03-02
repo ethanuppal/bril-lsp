@@ -96,10 +96,7 @@ fn main() -> Result<(), Whatever> {
             let _ = writeln!(&mut snapshot, "  {}: {}", variable, ty);
         }
     }
-    println!(
-        "PROGRAM\n--------\n{}\n\nTYPES\n-------\n{}",
-        code, snapshot
-    );
+    println!("PROGRAM\n--------\n{}\nTYPES\n-------\n{}", code, snapshot);
 
     Ok(())
 }

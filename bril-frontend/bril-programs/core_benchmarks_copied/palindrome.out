@@ -81,7 +81,6 @@ not_finished: bool = const true;
   ret is_palindrome;
 }
 
-
 TYPES
 -------
 FUNCTION @main
