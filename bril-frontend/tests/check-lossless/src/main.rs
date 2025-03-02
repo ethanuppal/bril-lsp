@@ -62,7 +62,9 @@ fn main() -> Result<(), Whatever> {
     let paths = opts
         .paths
         .into_iter()
-        .filter(|path| !opts.exclude.iter().any(|exclude| path.ends_with(exclude)))
+        .filter(|path| {
+            !opts.exclude.iter().any(|exclude| path.ends_with(exclude))
+        })
         .collect::<Vec<_>>();
     for path in paths.clone() {
         let sh = opts.sh.clone();

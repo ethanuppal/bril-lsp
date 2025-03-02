@@ -44,7 +44,9 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
 
     pub fn print_import(&mut self, import: &ast::Import) -> fmt::Result {
         write!(self.w, "from \"{}\" import ", import.path)?;
-        for (i, imported_function) in import.imported_functions.iter().enumerate() {
+        for (i, imported_function) in
+            import.imported_functions.iter().enumerate()
+        {
             if i > 0 {
                 write!(self.w, ", ")?;
             }
@@ -69,7 +71,10 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
         }
     }
 
-    pub fn print_type_annotation(&mut self, type_annotation: &ast::TypeAnnotation) -> fmt::Result {
+    pub fn print_type_annotation(
+        &mut self,
+        type_annotation: &ast::TypeAnnotation,
+    ) -> fmt::Result {
         write!(self.w, ": ")?;
         self.print_type(&type_annotation.ty)
     }
@@ -78,7 +83,10 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
         write!(self.w, "{}", label.name)
     }
 
-    pub fn print_constant_value(&mut self, constant_value: &ast::ConstantValue) -> fmt::Result {
+    pub fn print_constant_value(
+        &mut self,
+        constant_value: &ast::ConstantValue,
+    ) -> fmt::Result {
         match constant_value {
             ast::ConstantValue::IntegerLiteral(integer) => {
                 write!(self.w, "{}", integer)
@@ -212,12 +220,19 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
             ast::ValueOperationOp::Cge(lhs, rhs) => {
                 write!(self.w, "cge {} {}", lhs, rhs)
             }
-            ast::ValueOperationOp::Char2Int(value) => write!(self.w, "char2int {}", value),
-            ast::ValueOperationOp::Int2Char(value) => write!(self.w, "int2char {}", value),
+            ast::ValueOperationOp::Char2Int(value) => {
+                write!(self.w, "char2int {}", value)
+            }
+            ast::ValueOperationOp::Int2Char(value) => {
+                write!(self.w, "int2char {}", value)
+            }
         }
     }
 
-    pub fn print_value_operation(&mut self, value_operation: &ast::ValueOperation) -> fmt::Result {
+    pub fn print_value_operation(
+        &mut self,
+        value_operation: &ast::ValueOperation,
+    ) -> fmt::Result {
         write!(self.w, "{}", value_operation.name)?;
         if let Some(type_annotation) = &value_operation.type_annotation {
             self.print_type_annotation(type_annotation)?;
@@ -276,7 +291,9 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
             ast::EffectOperationOp::Store(pointer, value) => {
                 write!(self.w, "store {} {}", pointer, value)
             }
-            ast::EffectOperationOp::Free(pointer) => write!(self.w, "free {}", pointer),
+            ast::EffectOperationOp::Free(pointer) => {
+                write!(self.w, "free {}", pointer)
+            }
         }
     }
 
@@ -288,9 +305,14 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
         write!(self.w, ";")
     }
 
-    pub fn print_instruction(&mut self, instruction: &ast::Instruction) -> fmt::Result {
+    pub fn print_instruction(
+        &mut self,
+        instruction: &ast::Instruction,
+    ) -> fmt::Result {
         match instruction {
-            ast::Instruction::Constant(constant) => self.print_constant(constant),
+            ast::Instruction::Constant(constant) => {
+                self.print_constant(constant)
+            }
             ast::Instruction::ValueOperation(value_operation) => {
                 self.print_value_operation(value_operation)
             }
@@ -300,7 +322,10 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
         }
     }
 
-    pub fn print_function_code(&mut self, code: &ast::FunctionCode) -> fmt::Result {
+    pub fn print_function_code(
+        &mut self,
+        code: &ast::FunctionCode,
+    ) -> fmt::Result {
         match code {
             ast::FunctionCode::Label { label, comment, .. } => {
                 self.w.decrease_indent();
@@ -329,7 +354,9 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
     pub fn print_function(&mut self, function: &ast::Function) -> fmt::Result {
         write!(self.w, "{}(", function.name)?;
 
-        for (i, (name, type_annotation)) in function.parameters.iter().enumerate() {
+        for (i, (name, type_annotation)) in
+            function.parameters.iter().enumerate()
+        {
             if i > 0 {
                 write!(self.w, ", ")?;
             }
@@ -364,10 +391,15 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
         writeln!(self.w)
     }
 
-    pub fn print_top_level_item(&mut self, item: &ast::TopLevelItem) -> fmt::Result {
+    pub fn print_top_level_item(
+        &mut self,
+        item: &ast::TopLevelItem,
+    ) -> fmt::Result {
         match item {
             ast::TopLevelItem::Import(import) => self.print_import(import),
-            ast::TopLevelItem::Function(function) => self.print_function(function),
+            ast::TopLevelItem::Function(function) => {
+                self.print_function(function)
+            }
             ast::TopLevelItem::Comment(comment) => self.print_comment(comment),
             ast::TopLevelItem::Newline(_) => self.print_newline(),
         }

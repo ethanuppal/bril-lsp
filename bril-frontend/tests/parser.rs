@@ -26,7 +26,9 @@ macro_rules! parser_snapshot {
                         println!("Label: {}", text);
                         println!(
                             "Code: `{}`",
-                            &code[span.clone().unwrap_or(diagnostic.span.clone())]
+                            &code[span
+                                .clone()
+                                .unwrap_or(diagnostic.span.clone())]
                         );
                     }
                 }
@@ -67,7 +69,9 @@ macro_rules! parser_error {
 
             let mut parser = bril_frontend::parser::Parser::new(&tokens);
 
-            let Err(bril_frontend::parser::ParserFailedMarker) = parser.parse_program() else {
+            let Err(bril_frontend::parser::ParserFailedMarker) =
+                parser.parse_program()
+            else {
                 panic!("Parsing invalid program should have produced an error");
             };
 

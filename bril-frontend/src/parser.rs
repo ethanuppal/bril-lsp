@@ -26,7 +26,11 @@ impl Diagnostic {
         }
     }
 
-    pub fn label(mut self, text: impl Into<String>, spanned: impl Spanned) -> Self {
+    pub fn label(
+        mut self,
+        text: impl Into<String>,
+        spanned: impl Spanned,
+    ) -> Self {
         self.labels.push((text.into(), Some(spanned.span())));
         self
     }
@@ -127,7 +131,9 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
 
     pub fn get(&self, offset: isize) -> Option<&Loc<Token<'source>>> {
         let get_index = ((self.index as isize) + offset) as usize;
-        if !(offset < 0 && (-offset) as usize > self.index) && get_index < self.tokens.len() {
+        if !(offset < 0 && (-offset) as usize > self.index)
+            && get_index < self.tokens.len()
+        {
             Some(&self.tokens[get_index])
         } else {
             None
@@ -152,7 +158,8 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
 
     pub fn try_eat(&mut self, pattern: Token) -> Option<Loc<Token<'source>>> {
         if self.is_at(&pattern) {
-            let result = self.get(0).expect("is_at is true so we're not EOF").clone();
+            let result =
+                self.get(0).expect("is_at is true so we're not EOF").clone();
             self.advance();
             Some(result)
         } else {
@@ -167,7 +174,8 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
     ) -> Result<Loc<Token<'source>>> {
         let matches = pattern.matches().collect::<Vec<_>>();
         if matches.iter().any(|token| self.is_at(token)) {
-            let result = self.get(0).expect("is_at is true so we're not EOF").clone();
+            let result =
+                self.get(0).expect("is_at is true so we're not EOF").clone();
             self.advance();
             Ok(result)
         } else {
@@ -179,7 +187,10 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
                             current.pattern_name(),
                             matches
                                 .into_iter()
-                                .map(|token| format!("'{}'", token.pattern_name()))
+                                .map(|token| format!(
+                                    "'{}'",
+                                    token.pattern_name()
+                                ))
                                 .collect::<Vec<_>>()
                                 .join(", ")
                         ),
@@ -194,7 +205,10 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
                             "Unexpected EOF, expected {}",
                             matches
                                 .into_iter()
-                                .map(|token| format!("'{}'", token.pattern_name()))
+                                .map(|token| format!(
+                                    "'{}'",
+                                    token.pattern_name()
+                                ))
                                 .collect::<Vec<_>>()
                                 .join(", ")
                         ),
@@ -236,8 +250,9 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
             self.index += 1;
         }
 
-        self.diagnostics
-            .push(Diagnostic::new(message, current).explain("Recovery started here"));
+        self.diagnostics.push(
+            Diagnostic::new(message, current).explain("Recovery started here"),
+        );
     }
 
     pub fn parse_separated<'a, U, F: FnMut(&mut Self) -> Result<U>>(
@@ -298,7 +313,10 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
                     "Unexpected EOF, expected terminator (one of: {})",
                     terminators
                         .into_iter()
-                        .map(|terminator| format!("'{}'", terminator.pattern_name()))
+                        .map(|terminator| format!(
+                            "'{}'",
+                            terminator.pattern_name()
+                        ))
                         .collect::<Vec<_>>()
                         .join(", "),
                 ),
@@ -309,7 +327,10 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
         Err(ParserFailedMarker)
     }
 
-    pub fn parse_local_name(&mut self, message: impl Into<String>) -> Result<Loc<&'source str>> {
+    pub fn parse_local_name(
+        &mut self,
+        message: impl Into<String>,
+    ) -> Result<Loc<&'source str>> {
         Ok(self
             .eat(KEYWORD_LIKE, message)?
             .map(Token::assume_identifier_like))
@@ -333,14 +354,18 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
         .between(as_token, name))
     }
 
-    pub fn parse_imported_function(&mut self) -> Result<Loc<ast::ImportedFunction<'source>>> {
+    pub fn parse_imported_function(
+        &mut self,
+    ) -> Result<Loc<ast::ImportedFunction<'source>>> {
         let name = self
             .eat(Token::FunctionName(""), "Expected function name to import")?
             .map(Token::assume_function_name);
 
         let mut alias = None;
         if let Some(as_token) = self.try_eat(Token::As) {
-            alias = Some(self.parse_imported_function_alias(as_token.without_inner())?);
+            alias = Some(
+                self.parse_imported_function_alias(as_token.without_inner())?,
+            );
         }
 
         let start = name.span();
@@ -351,7 +376,10 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
         Ok(ast::ImportedFunction { name, alias }.between(start, end))
     }
 
-    pub fn parse_import(&mut self, from_token: Loc<()>) -> Result<Loc<ast::Import<'source>>> {
+    pub fn parse_import(
+        &mut self,
+        from_token: Loc<()>,
+    ) -> Result<Loc<ast::Import<'source>>> {
         let path = self
             .eat(Token::Path(""), "Expected path after `from`")?
             .map(Token::assume_path);
@@ -389,16 +417,24 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
     pub fn parse_constant_value(&mut self) -> Result<Loc<ast::ConstantValue>> {
         if let Some(integer) = self.try_eat(Token::Integer(0)) {
             let span = integer.span();
-            Ok(ast::ConstantValue::IntegerLiteral(integer.map(Token::assume_integer)).at(span))
+            Ok(ast::ConstantValue::IntegerLiteral(
+                integer.map(Token::assume_integer),
+            )
+            .at(span))
         } else if let Some(float) = self.try_eat(Token::Float(0.0)) {
             let span = float.span();
-            Ok(ast::ConstantValue::FloatLiteral(float.map(Token::assume_float)).at(span))
+            Ok(
+                ast::ConstantValue::FloatLiteral(
+                    float.map(Token::assume_float),
+                )
+                .at(span),
+            )
         } else if let Some(character) = self.try_eat(Token::Character(' ')) {
             let span = character.span();
-            Ok(
-                ast::ConstantValue::CharacterLiteral(character.map(Token::assume_character))
-                    .at(span),
+            Ok(ast::ConstantValue::CharacterLiteral(
+                character.map(Token::assume_character),
             )
+            .at(span))
         } else if let Some(true_literal) = self.try_eat(Token::True) {
             let span = true_literal.span();
             Ok(ast::ConstantValue::BooleanLiteral(true.at(&span)).at(span))
@@ -522,7 +558,9 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
         .between(start, end))
     }
 
-    pub fn parse_effect_operation_op(&mut self) -> Result<Loc<ast::EffectOperationOp<'source>>> {
+    pub fn parse_effect_operation_op(
+        &mut self,
+    ) -> Result<Loc<ast::EffectOperationOp<'source>>> {
         let op_name = self
             .eat(
                 Token::Identifier(""),
@@ -549,7 +587,9 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
         Err(ParserFailedMarker)
     }
 
-    pub fn parse_effect_operation(&mut self) -> Result<Loc<ast::EffectOperation<'source>>> {
+    pub fn parse_effect_operation(
+        &mut self,
+    ) -> Result<Loc<ast::EffectOperation<'source>>> {
         let op = self.parse_effect_operation_op()?;
         let semi_token = self
             .eat(
@@ -562,17 +602,21 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
         Ok(ast::EffectOperation { op, semi_token }.between(start, end))
     }
 
-    pub fn parse_instruction(&mut self) -> Result<Loc<ast::Instruction<'source>>> {
+    pub fn parse_instruction(
+        &mut self,
+    ) -> Result<Loc<ast::Instruction<'source>>> {
         let is_not_effect_operation = self
             .get(1)
             .map(|token| {
-                token.matches_against(Token::Colon) || token.matches_against(Token::Equals)
+                token.matches_against(Token::Colon)
+                    || token.matches_against(Token::Equals)
             })
             .unwrap_or(false);
 
         if is_not_effect_operation {
-            let name =
-                self.parse_local_name("Expected destination variable name in instruction")?;
+            let name = self.parse_local_name(
+                "Expected destination variable name in instruction",
+            )?;
 
             let type_annotation = if self.is_at(&Token::Colon) {
                 Some(self.parse_type_annotation()?)
@@ -614,14 +658,21 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
         }
     }
 
-    pub fn parse_function_code(&mut self) -> Result<Loc<ast::FunctionCode<'source>>> {
+    pub fn parse_function_code(
+        &mut self,
+    ) -> Result<Loc<ast::FunctionCode<'source>>> {
         if let Some(newline_token) = self.try_eat(Token::Newline) {
             let empty_line_span = newline_token.span();
-            Ok(ast::FunctionCode::EmptyLine(newline_token.without_inner()).at(empty_line_span))
+            Ok(ast::FunctionCode::EmptyLine(newline_token.without_inner())
+                .at(empty_line_span))
         } else if let Some(comment) = self.try_eat(Token::Comment("")) {
-            let _ = self.eat(Token::Newline, "Expected newline after comment")?;
+            let _ =
+                self.eat(Token::Newline, "Expected newline after comment")?;
             let comment_span = comment.span();
-            Ok(ast::FunctionCode::Comment(comment.map(Token::assume_comment)).at(comment_span))
+            Ok(
+                ast::FunctionCode::Comment(comment.map(Token::assume_comment))
+                    .at(comment_span),
+            )
         } else if self.is_at(&Token::Label("")) {
             let label = self.parse_label()?;
             let colon_token = self
@@ -648,7 +699,8 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
                 .try_eat(Token::Comment(""))
                 .map(|comment| comment.map(Token::assume_comment));
 
-            let _ = self.eat(Token::Newline, "Missing newline after instruction")?;
+            let _ =
+                self.eat(Token::Newline, "Missing newline after instruction")?;
             let span = instruction.span();
             Ok(ast::FunctionCode::Instruction {
                 inner: instruction,
@@ -669,7 +721,10 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
             "float" => ast::Type::Float.at(ty),
             "char" => ast::Type::Char.at(ty),
             "ptr" => {
-                self.eat(Token::LeftAngle, "Missing inner type for pointer type")?;
+                self.eat(
+                    Token::LeftAngle,
+                    "Missing inner type for pointer type",
+                )?;
                 let inner = self.parse_type()?;
                 let end = self.eat(
                     Token::RightAngle,
@@ -678,14 +733,18 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
                 ast::Type::Ptr(Box::new(inner)).between(ty, end)
             }
             _ => {
-                self.diagnostics
-                    .push(Diagnostic::new("Unknown type", ty).explain("This is not a valid type"));
+                self.diagnostics.push(
+                    Diagnostic::new("Unknown type", ty)
+                        .explain("This is not a valid type"),
+                );
                 return Err(ParserFailedMarker);
             }
         })
     }
 
-    pub fn parse_type_annotation(&mut self) -> Result<Loc<ast::TypeAnnotation>> {
+    pub fn parse_type_annotation(
+        &mut self,
+    ) -> Result<Loc<ast::TypeAnnotation>> {
         let colon_token = self
             .eat(Token::Colon, "Need colon before type in type annotation")?
             .without_inner();
@@ -754,7 +813,8 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
             }
         }
 
-        let end = self.eat(Token::RightBrace, "Missing left brace to open function")?;
+        let end =
+            self.eat(Token::RightBrace, "Missing left brace to open function")?;
 
         let _ = self.try_eat(Token::Newline);
 
@@ -773,18 +833,24 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
         let mut items = vec![];
         while !self.is_eof() {
             if let Some(newline_token) = self.try_eat(Token::Newline) {
-                items.push(ast::TopLevelItem::Newline(newline_token.without_inner()));
+                items.push(ast::TopLevelItem::Newline(
+                    newline_token.without_inner(),
+                ));
                 self.skip_newlines();
             } else if self.is_at(&Token::Newline) {
                 // single newline
                 self.advance();
-            } else if let Some(comment_token) = self.try_eat(Token::Comment("")) {
-                let _ = self.eat(Token::Newline, "Expected newline after comment")?;
+            } else if let Some(comment_token) = self.try_eat(Token::Comment(""))
+            {
+                let _ =
+                    self.eat(Token::Newline, "Expected newline after comment")?;
                 items.push(ast::TopLevelItem::Comment(
                     comment_token.map(Token::assume_comment),
                 ));
             } else if let Some(from_token) = self.try_eat(Token::From) {
-                if let Ok(import) = self.parse_import(from_token.without_inner()) {
+                if let Ok(import) =
+                    self.parse_import(from_token.without_inner())
+                {
                     items.push(ast::TopLevelItem::Import(import));
                 } else {
                     self.recover(
@@ -792,10 +858,12 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
                         "Failed to find another valid import or function to recover from",
                     );
                 }
-            } else if let Some(function_name) = self.try_eat(Token::FunctionName("")) {
-                if let Ok(function) =
-                    self.parse_function(function_name.map(Token::assume_function_name))
-                {
+            } else if let Some(function_name) =
+                self.try_eat(Token::FunctionName(""))
+            {
+                if let Ok(function) = self.parse_function(
+                    function_name.map(Token::assume_function_name),
+                ) {
                     items.push(ast::TopLevelItem::Function(function));
                 } else {
                     self.recover(
@@ -805,8 +873,13 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
                 }
             } else {
                 self.diagnostics.push(
-                    Diagnostic::new("Unexpected token", self.get(0).expect("We're not eof"))
-                        .explain("Top-level Bril constructs are imports or functions"),
+                    Diagnostic::new(
+                        "Unexpected token",
+                        self.get(0).expect("We're not eof"),
+                    )
+                    .explain(
+                        "Top-level Bril constructs are imports or functions",
+                    ),
                 );
                 self.recover(
                     [Token::Import, Token::FunctionName("")],

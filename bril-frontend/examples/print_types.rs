@@ -24,7 +24,12 @@ use bril_frontend::{
 use logos::Logos;
 use snafu::{whatever, OptionExt, ResultExt, Whatever};
 
-fn print_diagnostic(renderer: &Renderer, code: &str, file: &str, diagnostic: &Diagnostic) {
+fn print_diagnostic(
+    renderer: &Renderer,
+    code: &str,
+    file: &str,
+    diagnostic: &Diagnostic,
+) {
     let mut message = Level::Error.title(&diagnostic.message);
     for (text, span) in &diagnostic.labels {
         message = message.snippet(
@@ -46,14 +51,18 @@ fn main() -> Result<(), Whatever> {
 
     let mut reader: Box<dyn io::Read> = match file.as_str() {
         "-" => Box::new(io::stdin()),
-        _ => Box::new(fs::File::open(&file).whatever_context(format!("Failed to open {}", file))?),
+        _ => Box::new(
+            fs::File::open(&file)
+                .whatever_context(format!("Failed to open {}", file))?,
+        ),
     };
 
     let mut contents = vec![];
     reader
         .read_to_end(&mut contents)
         .whatever_context(format!("Failed to read {}", file))?;
-    let mut code = String::from_utf8(contents).whatever_context("Couldn't decode file as UTF-8")?;
+    let mut code = String::from_utf8(contents)
+        .whatever_context("Couldn't decode file as UTF-8")?;
     if !code.chars().last().map(|c| c == '\n').unwrap_or(false) {
         code.push('\n');
     }

@@ -210,7 +210,9 @@ impl Clone for Token<'_> {
             Self::Import => Self::Import,
             Self::From => Self::From,
             Self::As => Self::As,
-            Self::FunctionName(function_name) => Self::FunctionName(function_name),
+            Self::FunctionName(function_name) => {
+                Self::FunctionName(function_name)
+            }
             Self::Identifier(identifier) => Self::Identifier(identifier),
             Self::Label(label) => Self::Label(label),
             Self::Path(path) => Self::Path(path),

@@ -21,20 +21,24 @@ use snafu::{whatever, OptionExt, ResultExt, Whatever};
 
 #[snafu::report]
 fn main() -> Result<(), Whatever> {
-    let file = env::args()
-        .nth(1)
-        .whatever_context("Takes one file as an argument (pass `-` for standard input)")?;
+    let file = env::args().nth(1).whatever_context(
+        "Takes one file as an argument (pass `-` for standard input)",
+    )?;
 
     let mut reader: Box<dyn io::Read> = match file.as_str() {
         "-" => Box::new(io::stdin()),
-        _ => Box::new(fs::File::open(&file).whatever_context(format!("Failed to open {}", file))?),
+        _ => Box::new(
+            fs::File::open(&file)
+                .whatever_context(format!("Failed to open {}", file))?,
+        ),
     };
 
     let mut contents = vec![];
     reader
         .read_to_end(&mut contents)
         .whatever_context(format!("Failed to read {}", file))?;
-    let mut code = String::from_utf8(contents).whatever_context("Couldn't decode file as UTF-8")?;
+    let mut code = String::from_utf8(contents)
+        .whatever_context("Couldn't decode file as UTF-8")?;
     if !code.chars().last().map(|c| c == '\n').unwrap_or(false) {
         code.push('\n');
     }
@@ -59,7 +63,9 @@ fn main() -> Result<(), Whatever> {
                 message = message.snippet(
                     Snippet::source(&code).origin(&file).fold(true).annotation(
                         Level::Error
-                            .span(span.clone().unwrap_or(diagnostic.span.clone()))
+                            .span(
+                                span.clone().unwrap_or(diagnostic.span.clone()),
+                            )
                             .label(text.as_str()),
                     ),
                 );
