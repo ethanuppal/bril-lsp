@@ -49,7 +49,7 @@ jobs:
 
       - name: Test correct parsing
         run: |
-          cargo run --package check-lossless bril/benchmarks/**/*.bril
+          cargo run --package check-lossless bril/benchmarks/**/*.bril bril/examples/test/**/*.bril 
 
       - name: Install Turnt
         # run: pip install turnt  # Use instead if pip turnt version >= 1.7
