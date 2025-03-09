@@ -263,11 +263,9 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
             self.index += 1;
         }
 
-        self.diagnostics
-            .push(Diagnostic::new(message, current).explain(
-                "Recovery started
-         here",
-            ));
+        self.diagnostics.push(
+            Diagnostic::new(message, current).explain("Recovery started here"),
+        );
     }
 
     pub fn parse_separated<'a, U, F: FnMut(&mut Self) -> Result<U>>(
