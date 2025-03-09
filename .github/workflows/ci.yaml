@@ -36,6 +36,9 @@ jobs:
       - name: Clone Bril
         run: git clone https://github.com/sampsyo/bril && cd bril && git reset --hard bc60765c822852ab574fe8238d33dbe064a94943
 
+      - name: Remove old SSA stuff
+        run: rm -rf bril/examples/test/ssa
+
       - uses: actions/setup-python@v4
         with:
             python-version: '3.11'
