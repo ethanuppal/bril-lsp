@@ -56,7 +56,7 @@ const BUILTIN_COMPLETIONS: [BuiltinCompletionItem; 21] = [
         name: "mul",
         kind: CompletionItemKind::FUNCTION,
         extension: "https://capra.cs.cornell.edu/bril/lang/core.html",
-        description: "x + y.",
+        description: "x × y.",
     },
     BuiltinCompletionItem {
         name: "sub",
