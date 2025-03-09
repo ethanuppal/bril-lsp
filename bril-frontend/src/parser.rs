@@ -244,14 +244,14 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
     pub fn recover(
         &mut self,
         goals: impl IntoIterator<Item = Token<'source>>,
-        _message: impl Into<String>,
+        message: impl Into<String>,
     ) {
         assert!(
             !self.diagnostics.is_empty(),
             "INTERNAL BUG: Cannot recover without first reporting an error in self.diagnostics"
         );
 
-        let _current = self
+        let current = self
             .get(0)
             .map(|token| token.span())
             .unwrap_or(self.eof_span());
@@ -263,10 +263,11 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
             self.index += 1;
         }
 
-        //self.diagnostics.push(
-        //    Diagnostic::new(message, current).explain("Recovery started
-        // here"),
-        //);
+        self.diagnostics
+            .push(Diagnostic::new(message, current).explain(
+                "Recovery started
+         here",
+            ));
     }
 
     pub fn parse_separated<'a, U, F: FnMut(&mut Self) -> Result<U>>(
