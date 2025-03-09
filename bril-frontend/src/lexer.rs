@@ -31,7 +31,7 @@ pub enum Token<'a> {
 
     #[regex(r"@[\p{XID_Start}_]\p{XID_Continue}*")]
     FunctionName(&'a str),
-    #[regex(r"[\p{XID_Start}_]\p{XID_Continue}*")]
+    #[regex(r"[\p{XID_Start}_][\p{XID_Continue}\.]*")]
     Identifier(&'a str),
     #[regex(r"\.[\p{XID_Start}_][\p{XID_Continue}\.]*")]
     Label(&'a str),
