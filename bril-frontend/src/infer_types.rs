@@ -43,6 +43,7 @@ pub fn type_infer_function(
 ) -> Result<BTreeMap<String, Type>, Diagnostic> {
     let symbols = RefCell::new(HashMap::new());
     let env = RefCell::new(BTreeMap::new());
+    let mut shadow_env = BTreeMap::new();
     let mut return_type = None;
 
     for (parameter, type_annotation) in &function.parameters {
@@ -86,7 +87,7 @@ pub fn type_infer_function(
                         .expect("type exists so symbol does too");
                     Err(Diagnostic::new(
                         format!(
-                            "Expected argument of type {} in {} instruction",
+                            "Expected argument of type {} in `{}` instruction",
                             ty, op
                         ),
                         arg,
@@ -98,7 +99,7 @@ pub fn type_infer_function(
                 }
             } else {
                 Err(Diagnostic::new(
-                    format!("Undefined variable in this {} instruction", op),
+                    format!("Undefined variable in this `{}` instruction", op),
                     arg,
                 ))
             }
@@ -233,8 +234,20 @@ pub fn type_infer_function(
                                 env.borrow().get(&value.to_string()).cloned()
                             else {
                                 return Err(Diagnostic::new(
-                                    "Undefined variable in id instruction",
+                                    "Undefined variable in `id` instruction",
                                     value,
+                                ));
+                            };
+                            ty
+                        }
+                        ast::ValueOperationOp::Get => {
+                            let Some(ty) = shadow_env
+                                .get(&value_operation.name.to_string())
+                                .cloned()
+                            else {
+                                return Err(Diagnostic::new(
+                                    "Undefined shadow variable in `get` instruction",
+                                    &value_operation.name,
                                 ));
                             };
                             ty
@@ -403,6 +416,17 @@ pub fn type_infer_function(
                         }
                         ast::EffectOperationOp::Print(_) => {}
                         ast::EffectOperationOp::Nop => {}
+                        ast::EffectOperationOp::Set(shadow_variable, value) => {
+                            let Some(ty) =
+                                env.borrow().get(&value.to_string()).cloned()
+                            else {
+                                return Err(Diagnostic::new(
+                                    "Undefined variable in `set` instruction",
+                                    value,
+                                ));
+                            };
+                            shadow_env.insert(shadow_variable.to_string(), ty);
+                        }
                         ast::EffectOperationOp::Store(_loc, _loc1) => {
                             todo!("implement hindley-milner")
                         }

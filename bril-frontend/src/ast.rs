@@ -160,6 +160,8 @@ pub enum ValueOperationOp<'a> {
     Call(Loc<&'a str>, Vec<Loc<&'a str>>),
     Id(Loc<&'a str>),
 
+    Get,
+
     Fadd(Loc<&'a str>, Loc<&'a str>),
     Fmul(Loc<&'a str>, Loc<&'a str>),
     Fsub(Loc<&'a str>, Loc<&'a str>),
@@ -200,6 +202,8 @@ pub enum EffectOperationOp<'a> {
 
     Print(Vec<Loc<&'a str>>),
     Nop,
+
+    Set(Loc<&'a str>, Loc<&'a str>),
 
     Store(Loc<&'a str>, Loc<&'a str>),
     Free(Loc<&'a str>),
