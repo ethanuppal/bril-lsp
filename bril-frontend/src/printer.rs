@@ -169,6 +169,9 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
             ast::ValueOperationOp::Id(value) => {
                 write!(self.w, "id {}", value)
             }
+            ast::ValueOperationOp::Get => {
+                write!(self.w, "get")
+            }
             ast::ValueOperationOp::Fadd(lhs, rhs) => {
                 write!(self.w, "fadd {} {}", lhs, rhs)
             }
@@ -288,6 +291,9 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
                 )
             }
             ast::EffectOperationOp::Nop => write!(self.w, "nop"),
+            ast::EffectOperationOp::Set(shadow, value) => {
+                write!(self.w, "set {shadow} {value}")
+            }
             ast::EffectOperationOp::Store(pointer, value) => {
                 write!(self.w, "store {} {}", pointer, value)
             }

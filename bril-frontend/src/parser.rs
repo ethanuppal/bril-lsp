@@ -102,6 +102,19 @@ macro_rules! try_op {
             return Ok(op.between($op_name, end));
         }
     };
+    (
+        $self:ident;
+        $op_name:ident:$name:literal =>
+        $enum:ident::$variant:ident
+    ) => {
+        if $op_name.inner == $name {
+            #[allow(unused_assignments)]
+            #[allow(unused_mut)]
+            let mut end = $op_name.span();
+            let op = $crate::ast::$enum::$variant;
+            return Ok(op.between($op_name, end));
+        }
+    };
 }
 
 #[allow(clippy::result_unit_err)]
@@ -501,6 +514,8 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
         try_op!(self; op_name: "call" => ValueOperationOp::Call(destination as Token::FunctionName, arguments as Vec::from));
         try_op!(self; op_name: "id" => ValueOperationOp::Id(value as Token::Identifier));
 
+        try_op!(self; op_name: "get" => ValueOperationOp::Get);
+
         try_op!(self; op_name: "fadd" => ValueOperationOp::Fadd(lhs as Token::Identifier, rhs as Token::Identifier));
         try_op!(self; op_name: "fmul" => ValueOperationOp::Fmul(lhs as Token::Identifier, rhs as Token::Identifier));
         try_op!(self; op_name: "fsub" => ValueOperationOp::Fsub(lhs as Token::Identifier, rhs as Token::Identifier));
@@ -574,6 +589,8 @@ impl<'tokens, 'source: 'tokens> Parser<'tokens, 'source> {
         try_op!(self; op_name: "ret" => EffectOperationOp::Ret(value as Option::from));
         try_op!(self; op_name: "print" => EffectOperationOp::Print(value as Vec::from));
         try_op!(self; op_name: "nop" => EffectOperationOp::Nop);
+
+        try_op!(self; op_name: "set" => EffectOperationOp::Set(shadow_variable as Token::Identifier, value as Token::Identifier));
 
         try_op!(self; op_name: "store" => EffectOperationOp::Store(pointer as Token::Identifier, value as Token::Identifier));
         try_op!(self; op_name: "free" => EffectOperationOp::Free(pointer as Token::Identifier));
