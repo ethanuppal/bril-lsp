@@ -40,7 +40,16 @@
         "path": "./syntaxes/bril.tmLanguage.json"
       }
     ],
-    "commands": []
+    "configuration": {
+      "title": "Bril",
+      "properties": {
+        "bril.lsp.path": {
+          "type": "string",
+          "default": "bril-lsp",
+          "description": "The absolute path to the bril-lsp executable."
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run esbuild-base -- --minify",
