@@ -75,36 +75,34 @@ pub fn type_infer_function(
             }
         };
 
-    let ensure = |op: &str,
-                  arg: &Loc<&str>,
-                  ty: Type|
-     -> Result<(), Diagnostic> {
-        if let Some(arg_type) = env.borrow().get(&arg.to_string()) {
-            if arg_type.is_same_type_as(&ty) {
-                Ok(())
-            } else {
-                let symbols = symbols.borrow();
-                let original = symbols
-                    .get(&arg.to_string())
-                    .expect("type exists so symbol does too");
-                Err(Diagnostic::new(
-                    format!(
+    let ensure =
+        |op: &str, arg: &Loc<&str>, ty: Type| -> Result<(), Diagnostic> {
+            if let Some(arg_type) = env.borrow().get(&arg.to_string()) {
+                if arg_type.is_same_type_as(&ty) {
+                    Ok(())
+                } else {
+                    let symbols = symbols.borrow();
+                    let original = symbols
+                        .get(&arg.to_string())
+                        .expect("type exists so symbol does too");
+                    Err(Diagnostic::new(
+                        format!(
                         "Expected argument of type {ty} in `{op}` instruction"
                     ),
+                        arg,
+                    )
+                    .label(
+                        format!("Type inferred here to be {arg_type}"),
+                        original,
+                    ))
+                }
+            } else {
+                Err(Diagnostic::new(
+                    format!("Undefined variable in this `{op}` instruction"),
                     arg,
-                )
-                .label(
-                    format!("Type inferred here to be {arg_type}"),
-                    original,
                 ))
             }
-        } else {
-            Err(Diagnostic::new(
-                format!("Undefined variable in this `{op}` instruction"),
-                arg,
-            ))
-        }
-    };
+        };
 
     for code in &function.body {
         if let ast::FunctionCode::Instruction {
