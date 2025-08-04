@@ -89,16 +89,16 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
     ) -> fmt::Result {
         match constant_value {
             ast::ConstantValue::IntegerLiteral(integer) => {
-                write!(self.w, "{}", integer)
+                write!(self.w, "{integer}")
             }
             ast::ConstantValue::BooleanLiteral(boolean) => {
-                write!(self.w, "{}", boolean)
+                write!(self.w, "{boolean}")
             }
             ast::ConstantValue::FloatLiteral(float) => {
-                write!(self.w, "{}", float)
+                write!(self.w, "{float}")
             }
             ast::ConstantValue::CharacterLiteral(character) => {
-                write!(self.w, "{}", character)
+                write!(self.w, "{character}")
             }
         }
     }
@@ -119,40 +119,40 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
     ) -> fmt::Result {
         match value_operation_op {
             ast::ValueOperationOp::Add(lhs, rhs) => {
-                write!(self.w, "add {} {}", lhs, rhs)
+                write!(self.w, "add {lhs} {rhs}")
             }
             ast::ValueOperationOp::Mul(lhs, rhs) => {
-                write!(self.w, "mul {} {}", lhs, rhs)
+                write!(self.w, "mul {lhs} {rhs}")
             }
             ast::ValueOperationOp::Sub(lhs, rhs) => {
-                write!(self.w, "sub {} {}", lhs, rhs)
+                write!(self.w, "sub {lhs} {rhs}")
             }
             ast::ValueOperationOp::Div(lhs, rhs) => {
-                write!(self.w, "div {} {}", lhs, rhs)
+                write!(self.w, "div {lhs} {rhs}")
             }
             ast::ValueOperationOp::Eq(lhs, rhs) => {
-                write!(self.w, "eq {} {}", lhs, rhs)
+                write!(self.w, "eq {lhs} {rhs}")
             }
             ast::ValueOperationOp::Lt(lhs, rhs) => {
-                write!(self.w, "lt {} {}", lhs, rhs)
+                write!(self.w, "lt {lhs} {rhs}")
             }
             ast::ValueOperationOp::Gt(lhs, rhs) => {
-                write!(self.w, "gt {} {}", lhs, rhs)
+                write!(self.w, "gt {lhs} {rhs}")
             }
             ast::ValueOperationOp::Le(lhs, rhs) => {
-                write!(self.w, "le {} {}", lhs, rhs)
+                write!(self.w, "le {lhs} {rhs}")
             }
             ast::ValueOperationOp::Ge(lhs, rhs) => {
-                write!(self.w, "ge {} {}", lhs, rhs)
+                write!(self.w, "ge {lhs} {rhs}")
             }
             ast::ValueOperationOp::Not(value) => {
-                write!(self.w, "not {}", value)
+                write!(self.w, "not {value}")
             }
             ast::ValueOperationOp::And(lhs, rhs) => {
-                write!(self.w, "and {} {}", lhs, rhs)
+                write!(self.w, "and {lhs} {rhs}")
             }
             ast::ValueOperationOp::Or(lhs, rhs) => {
-                write!(self.w, "or {} {}", lhs, rhs)
+                write!(self.w, "or {lhs} {rhs}")
             }
             ast::ValueOperationOp::Call(function_name, arguments) => {
                 write!(
@@ -167,67 +167,67 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
                 )
             }
             ast::ValueOperationOp::Id(value) => {
-                write!(self.w, "id {}", value)
+                write!(self.w, "id {value}")
             }
             ast::ValueOperationOp::Get => {
                 write!(self.w, "get")
             }
             ast::ValueOperationOp::Fadd(lhs, rhs) => {
-                write!(self.w, "fadd {} {}", lhs, rhs)
+                write!(self.w, "fadd {lhs} {rhs}")
             }
             ast::ValueOperationOp::Fmul(lhs, rhs) => {
-                write!(self.w, "fmul {} {}", lhs, rhs)
+                write!(self.w, "fmul {lhs} {rhs}")
             }
             ast::ValueOperationOp::Fsub(lhs, rhs) => {
-                write!(self.w, "fsub {} {}", lhs, rhs)
+                write!(self.w, "fsub {lhs} {rhs}")
             }
             ast::ValueOperationOp::Fdiv(lhs, rhs) => {
-                write!(self.w, "fdiv {} {}", lhs, rhs)
+                write!(self.w, "fdiv {lhs} {rhs}")
             }
             ast::ValueOperationOp::Feq(lhs, rhs) => {
-                write!(self.w, "feq {} {}", lhs, rhs)
+                write!(self.w, "feq {lhs} {rhs}")
             }
             ast::ValueOperationOp::Flt(lhs, rhs) => {
-                write!(self.w, "flt {} {}", lhs, rhs)
+                write!(self.w, "flt {lhs} {rhs}")
             }
             ast::ValueOperationOp::Fle(lhs, rhs) => {
-                write!(self.w, "fle {} {}", lhs, rhs)
+                write!(self.w, "fle {lhs} {rhs}")
             }
             ast::ValueOperationOp::Fgt(lhs, rhs) => {
-                write!(self.w, "fgt {} {}", lhs, rhs)
+                write!(self.w, "fgt {lhs} {rhs}")
             }
             ast::ValueOperationOp::Fge(lhs, rhs) => {
-                write!(self.w, "fge {} {}", lhs, rhs)
+                write!(self.w, "fge {lhs} {rhs}")
             }
             ast::ValueOperationOp::Alloc(size) => {
-                write!(self.w, "alloc {}", size)
+                write!(self.w, "alloc {size}")
             }
             ast::ValueOperationOp::Load(pointer) => {
-                write!(self.w, "load {}", pointer)
+                write!(self.w, "load {pointer}")
             }
             ast::ValueOperationOp::PtrAdd(pointer, offset) => {
-                write!(self.w, "ptradd {} {}", pointer, offset)
+                write!(self.w, "ptradd {pointer} {offset}")
             }
             ast::ValueOperationOp::Ceq(lhs, rhs) => {
-                write!(self.w, "ceq {} {}", lhs, rhs)
+                write!(self.w, "ceq {lhs} {rhs}")
             }
             ast::ValueOperationOp::Clt(lhs, rhs) => {
-                write!(self.w, "clt {} {}", lhs, rhs)
+                write!(self.w, "clt {lhs} {rhs}")
             }
             ast::ValueOperationOp::Cle(lhs, rhs) => {
-                write!(self.w, "cle {} {}", lhs, rhs)
+                write!(self.w, "cle {lhs} {rhs}")
             }
             ast::ValueOperationOp::Cgt(lhs, rhs) => {
-                write!(self.w, "cgt {} {}", lhs, rhs)
+                write!(self.w, "cgt {lhs} {rhs}")
             }
             ast::ValueOperationOp::Cge(lhs, rhs) => {
-                write!(self.w, "cge {} {}", lhs, rhs)
+                write!(self.w, "cge {lhs} {rhs}")
             }
             ast::ValueOperationOp::Char2Int(value) => {
-                write!(self.w, "char2int {}", value)
+                write!(self.w, "char2int {value}")
             }
             ast::ValueOperationOp::Int2Char(value) => {
-                write!(self.w, "int2char {}", value)
+                write!(self.w, "int2char {value}")
             }
         }
     }
@@ -255,7 +255,7 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
                 self.print_label(destination)
             }
             ast::EffectOperationOp::Br(condition, if_true, if_false) => {
-                write!(self.w, "br {} ", condition)?;
+                write!(self.w, "br {condition} ")?;
                 self.print_label(if_true)?;
                 write!(self.w, " ")?;
                 self.print_label(if_false)
@@ -275,7 +275,7 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
             ast::EffectOperationOp::Ret(value) => {
                 write!(self.w, "ret")?;
                 if let Some(value) = value {
-                    write!(self.w, " {}", value)?;
+                    write!(self.w, " {value}")?;
                 }
                 Ok(())
             }
@@ -295,10 +295,10 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
                 write!(self.w, "set {shadow} {value}")
             }
             ast::EffectOperationOp::Store(pointer, value) => {
-                write!(self.w, "store {} {}", pointer, value)
+                write!(self.w, "store {pointer} {value}")
             }
             ast::EffectOperationOp::Free(pointer) => {
-                write!(self.w, "free {}", pointer)
+                write!(self.w, "free {pointer}")
             }
         }
     }
@@ -339,19 +339,19 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
                 write!(self.w, ":")?;
                 self.w.increase_indent();
                 if let Some(comment) = comment {
-                    writeln!(self.w, " {}", comment)?;
+                    writeln!(self.w, " {comment}")?;
                 }
                 writeln!(self.w)
             }
             ast::FunctionCode::Instruction { inner, comment } => {
                 self.print_instruction(inner)?;
                 if let Some(comment) = comment {
-                    writeln!(self.w, " {}", comment)?;
+                    writeln!(self.w, " {comment}")?;
                 }
                 writeln!(self.w)
             }
             ast::FunctionCode::Comment(comment) => {
-                writeln!(self.w, "{}", comment)
+                writeln!(self.w, "{comment}")
             }
             ast::FunctionCode::EmptyLine(_) => writeln!(self.w),
         }
@@ -366,7 +366,7 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
             if i > 0 {
                 write!(self.w, ", ")?;
             }
-            write!(self.w, "{}", name)?;
+            write!(self.w, "{name}")?;
             self.print_type_annotation(type_annotation)?;
         }
 
@@ -390,7 +390,7 @@ impl<'writer, W: fmt::Write> Printer<'writer, W> {
     }
 
     pub fn print_comment(&mut self, comment: &str) -> fmt::Result {
-        writeln!(self.w, "{}", comment)
+        writeln!(self.w, "{comment}")
     }
 
     pub fn print_newline(&mut self) -> fmt::Result {

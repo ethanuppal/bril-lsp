@@ -108,7 +108,7 @@ impl fmt::Display for Type {
             Type::Bool => "bool".fmt(f),
             Type::Float => "float".fmt(f),
             Type::Char => "char".fmt(f),
-            Type::Ptr(inner) => write!(f, "ptr<{}>", inner),
+            Type::Ptr(inner) => write!(f, "ptr<{inner}>"),
         }
     }
 }

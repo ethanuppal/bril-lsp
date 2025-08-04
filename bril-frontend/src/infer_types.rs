@@ -87,19 +87,18 @@ pub fn type_infer_function(
                         .expect("type exists so symbol does too");
                     Err(Diagnostic::new(
                         format!(
-                            "Expected argument of type {} in `{}` instruction",
-                            ty, op
+                            "Expected argument of type {ty} in `{op}` instruction"
                         ),
                         arg,
                     )
                     .label(
-                        format!("Type inferred here to be {}", arg_type),
+                        format!("Type inferred here to be {arg_type}"),
                         original,
                     ))
                 }
             } else {
                 Err(Diagnostic::new(
-                    format!("Undefined variable in this `{}` instruction", op),
+                    format!("Undefined variable in this `{op}` instruction"),
                     arg,
                 ))
             }
@@ -391,7 +390,7 @@ pub fn type_infer_function(
                                 )?;
                             }
                             if let Some(return_type) = &signature.1 {
-                                return Err(Diagnostic::new(format!("Called function returns {}, but call used as effect operation", return_type), name));
+                                return Err(Diagnostic::new(format!("Called function returns {return_type}, but call used as effect operation"), name));
                             }
                         }
                         ast::EffectOperationOp::Ret(value) => {
@@ -407,8 +406,7 @@ pub fn type_infer_function(
                             } else if let Some(return_type) = return_type {
                                 return Err(Diagnostic::new(
                                     format!(
-                                        "Tried to return nothing, but function has return type {}",
-                                        return_type
+                                        "Tried to return nothing, but function has return type {return_type}"
                                     ),
                                     effect_operation,
                                 ));

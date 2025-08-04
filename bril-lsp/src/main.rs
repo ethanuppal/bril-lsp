@@ -277,7 +277,7 @@ impl Backend {
             self.client
                 .log_message(
                     MessageType::ERROR,
-                    format!("{}: failed to canonicalize {}", message, uri),
+                    format!("{message}: failed to canonicalize {uri}"),
                 )
                 .await;
             return vec![Diagnostic::new(
@@ -285,7 +285,7 @@ impl Backend {
                 Some(DiagnosticSeverity::ERROR),
                 None,
                 None,
-                format!("Failed to canonicalize file path {}", uri),
+                format!("Failed to canonicalize file path {uri}"),
                 None,
                 None,
             )];
@@ -685,7 +685,7 @@ impl LanguageServer for Backend {
                             .map(|ty| ty.to_string())
                             .unwrap_or_default(),
                         LspSymbol::Label(_, function) => {
-                            format!("Defined in `{}`", function)
+                            format!("Defined in `{function}`")
                         }
                         LspSymbol::Function(_, signature) => {
                             signature.clone().unwrap_or_default()
@@ -716,22 +716,21 @@ impl LanguageServer for Backend {
                         "Variable `{}`{}",
                         name,
                         if let Some(ty) = ty {
-                            format!(": `{}`", ty)
+                            format!(": `{ty}`")
                         } else {
                             "".into()
                         }
                     ),
                     LspSymbol::Label(label, function) => {
                         format!(
-                            "Label `{}`, defined in function `{}`",
-                            label, function
+                            "Label `{label}`, defined in function `{function}`"
                         )
                     }
                     LspSymbol::Function(function, signature) => format!(
                         "Function `{}{}",
                         function,
                         if let Some(signature) = signature {
-                            format!("{}`", signature)
+                            format!("{signature}`")
                         } else {
                             "`".into()
                         }
