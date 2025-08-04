@@ -75,15 +75,13 @@ fn main() -> Result<(), Whatever> {
         pool.execute(move || {
             let try_block = move || -> Result<Utf8PathBuf, Whatever> {
                 let contents = fs::read_to_string(&path)
-                    .whatever_context(format!("Failed to read {}", path))?;
+                    .whatever_context(format!("Failed to read {path}"))?;
                 let mut bril2json_child = Command::new(&bril2json)
                     .stdin(Stdio::piped())
                     .stdout(Stdio::piped())
                     .spawn()
                     .whatever_context(format!(
-                        "Failed to spawn bril2json: invoked `{} < {}`",
-                        bril2json,
-                        path
+                        "Failed to spawn bril2json: invoked `{bril2json} < {path}`"
                     ))?;
                 bril2json_child.stdin.as_mut().whatever_context("Couldn't access the standard input of the bril2json child process")?.write_all(contents.as_bytes()).whatever_context("Failed to write to standard input")?;
                 let bril2json_output = bril2json_child
@@ -104,7 +102,7 @@ fn main() -> Result<(), Whatever> {
                 let bril2json_bril: serde_json::Value = serde_json::from_str(&bril2json_stdout).whatever_context("Failed to parse bril2json output as valid JSON")?;
 
                 // too lazy to be granular here
-                let our_output = Command::new(sh).args(["-c", &format!("{cargo} run --quiet --example print -- {path} | {bril2json}")]).output().whatever_context(format!("Failed to execute the lossless printer on {}", path))?;
+                let our_output = Command::new(sh).args(["-c", &format!("{cargo} run --quiet --example print -- {path} | {bril2json}")]).output().whatever_context(format!("Failed to execute the lossless printer on {path}"))?;
 
                 let our_stdout =
                         String::from_utf8(our_output.stdout).unwrap_or_default();

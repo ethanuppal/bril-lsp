@@ -29,14 +29,14 @@ fn main() -> Result<(), Whatever> {
         "-" => Box::new(io::stdin()),
         _ => Box::new(
             fs::File::open(&file)
-                .whatever_context(format!("Failed to open {}", file))?,
+                .whatever_context(format!("Failed to open {file}"))?,
         ),
     };
 
     let mut contents = vec![];
     reader
         .read_to_end(&mut contents)
-        .whatever_context(format!("Failed to read {}", file))?;
+        .whatever_context(format!("Failed to read {file}"))?;
     let mut code = String::from_utf8(contents)
         .whatever_context("Couldn't decode file as UTF-8")?;
     if !code.chars().last().map(|c| c == '\n').unwrap_or(false) {
@@ -79,7 +79,7 @@ fn main() -> Result<(), Whatever> {
     Printer::new(&mut buffer, 2)
         .print_program(&program)
         .whatever_context("Failed to format program")?;
-    print!("{}", buffer);
+    print!("{buffer}");
 
     Ok(())
 }
