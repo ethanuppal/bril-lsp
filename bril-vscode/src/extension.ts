@@ -8,24 +8,10 @@ import {
 } from 'vscode-languageclient/node';
 
 
-// https://stackoverflow.com/a/74743490/10652070
-const { execSync } = require('child_process');
-const shell = (cmd) => execSync(cmd, { encoding: 'utf8' });
-function executableIsAvailable(name) {
-    try { shell(`which ${name}`); return true }
-    catch (error) { return false }
-}
-
 export function activate(_context: vscode.ExtensionContext) {
-    if (!executableIsAvailable("bril-lsp")) {
-        vscode.window.showErrorMessage("Could not find the `bril-lsp` executable in your `$PATH`. Please follow the instructions on the extension page to install it.");
-        return;
-    } else {
-        vscode.window.showErrorMessage("I'm confused");
-    }
-
+    const cmd = vscode.workspace.getConfiguration("bril").get<string>("lsp.path");
     const serverOptions: ServerOptions = {
-        command: 'bril-lsp',
+        command: cmd,
         args: []
     }
 
@@ -37,9 +23,14 @@ export function activate(_context: vscode.ExtensionContext) {
         ],
     };
 
-    const client = new LanguageClient('bril-lsp', serverOptions, clientOptions);
-    client.start();
+    const client: LanguageClient = new LanguageClient(
+        "bril-lsp",
+        "Bril Language Server",
+        serverOptions,
+        clientOptions
+    );
 
+    client.start();
 }
 
 export function deactivate() { }
